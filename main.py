@@ -1,13 +1,51 @@
+import sys, os, string, threading,configparser
 import paramiko
 
-client = paramiko.SSHClient()
-client.load_system_host_keys()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+# CONFIGURATION FILE PATH
+path_configFile = "config.ini"
 
-client.connect(hostname="leodagan.telecomste.net", username="grudu", password="113-TgBT-3784", port=22113)
+# Loading configuration file ----------------------------------------
+config = configparser.ConfigParser()
+config.read(path_configFile)
 
-command="ls"
-_, stdout, stderr = client.exec_command(command)
-output = stdout.read().decode("utf-8")
-for line in output.splitlines():
-    print(line)
+machines_hostnames = config['monitored_machines']['hostnames'].split(';')
+machines_usernames = config['monitored_machines']['usernames'].split(';')
+machines_passwords = config['monitored_machines']['passwords'].split(';')
+machines_ports = config['monitored_machines']['ports'].split(';')
+
+print(machines_hostnames)
+print(machines_usernames)
+print(machines_passwords)
+print(machines_ports)
+print("Configuration succesfully loaded !")
+
+cmd="ls"
+outlock = threading.Lock()
+def workon(id):
+    ssh = paramiko.SSHClient()
+    ssh.load_system_host_keys()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(machines_hostnames[id], username=machines_usernames[id], password=machines_passwords[id], port=machines_ports[id])
+    _, stdout, stderr = ssh.exec_command(cmd)
+    output = stdout.read().decode("utf-8")
+
+    with outlock:
+        print("")
+        print("[" + machines_usernames[id] + "]")
+        for line in output.splitlines():
+            print(line)
+
+
+threads = []
+machine_id = 0
+
+for h in machines_hostnames:
+    t = threading.Thread(
+        target=workon,
+        args=(machine_id,)
+    )
+    t.start()
+    threads.append(t)
+    machine_id = machine_id+1
+for t in threads:
+    t.join()
