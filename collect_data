@@ -1,0 +1,23 @@
+import paramiko.ssh_exception
+import sys
+
+hostname="leodagan.telecomste.net"
+username="grudu"
+password="113-TgBT-3784"
+port=22113
+
+client = paramiko.SSHClient()
+client.load_system_host_keys()
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+
+"""client.connect(hostname=hostname, username=username, password=password, port=port)"""
+
+client.connect(hostname="leodagan.telecomste.net", username="grudu", password="113-TgBT-3784", port=22113)
+
+command =sys.argv[0]
+
+
+_, stdout, stderr = client.exec_command(command)
+output = stdout.read().decode("utf-8")
+for line in output.splitlines():
+    print(line) 
