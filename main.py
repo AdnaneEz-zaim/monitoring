@@ -1,47 +1,31 @@
-import sys, os, string, threading,configparser
-import paramiko
+import configparser
+import paramiko.ssh_exception
+import sys, os, string, threading,logging
+from models.class_config import Config
+from models.class_connexion import Connexion
 
-# CONFIGURATION FILE PATH
-path_configFile = "config.ini"
+monitor0 = Config(0)
 
-# Loading configuration file ----------------------------------------
-config = configparser.ConfigParser()
-config.read(path_configFile)
+connexion = Connexion(monitor0)
+print(connexion.client)
+client = connexion.client
 
-machines_hostnames = config['monitored_machines']['hostnames'].split(';')
-machines_usernames = config['monitored_machines']['usernames'].split(';')
-machines_passwords = config['monitored_machines']['passwords'].split(';')
-machines_ports = config['monitored_machines']['ports'].split(';')
 
-print(machines_hostnames)
-print(machines_usernames)
-print(machines_passwords)
-print(machines_ports)
-print("Configuration succesfully loaded !")
+logging.basicConfig(level=logging.DEBUG,
+                    filename=monitor0.hostname+".log",
+                    
+                    format='%(message)s')
 
-cmd="ls"
-outlock = threading.Lock()
-def workon(id):
-    _, stdout, stderr = ssh.exec_command(cmd)
+def get_data(command):
+   
+    _, stdout, stderr = client.exec_command(command)
     output = stdout.read().decode("utf-8")
-
-    with outlock:
-        print("")
-        print("[" + machines_usernames[id] + "]")
-        for line in output.splitlines():
+    for line in output.splitlines():
             print(line)
+            logging.info(line)
 
 
-threads = []
-machine_id = 0
-
-for h in machines_hostnames:
-    t = threading.Thread(
-        target=workon,
-        args=(machine_id,)
-    )
-    t.start()
-    threads.append(t)
-    machine_id = machine_id+1
-for t in threads:
-    t.join()
+args= ["free","top","ps","vmstat","ifconfig -a","cat /proc/meminfo", "cat /proc/cpuinfo","iotop"]
+for i in range(0,len(args)):
+    get_data(args[i])
+    print(i)
