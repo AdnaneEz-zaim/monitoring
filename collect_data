@@ -1,26 +1,40 @@
 import paramiko.ssh_exception
-import sys
-import logging
+import sys, os, string, threading,configparser,logging
+from models.class_config import Config
 
-hostname="leodagan.telecomste.net"
-username="grudu"
-password="113-TgBT-3784"
-port=22113 
+# CONFIGURATION FILE PATH
+path_configFile = "config.ini"
 
-client = paramiko.SSHClient()
-client.load_system_host_keys()
-client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
-client.connect(hostname="leodagan.telecomste.net", username="grudu", password="113-TgBT-3784", port=22113)
+# Loading configuration file ----------------------------------------
+config = configparser.ConfigParser()
+config.read(path_configFile)
 
-args= ["free","top","ps","vmstat","ifconfig -a","cat /proc/meminfo", "cat /proc/cpuinfo","iotop"]
+machines_hostnames = config['monitored_machines']['hostnames'].split(';')
+machines_usernames = config['monitored_machines']['usernames'].split(';')
+machines_passwords = config['monitored_machines']['passwords'].split(';')
+machines_ports = config['monitored_machines']['ports'].split(';')
 
-for i in range(0,len(args)):
+monitor0 = Config(machines_hostnames[0],machines_usernames[0],machines_passwords[0],machines_ports[0])
+
+def connexion():
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+    client.connect(hostname=monitor0.get_hostnames, username=monitor0.get_usernames, password=monitor0.get_passwords, port=monitor0.get_ports)
+    return client
+
+
+def get_data(command):
     logging.basicConfig(level=logging.DEBUG,
-                    filename=args[i]+".log",
+                    filename=command+".log",
                     filemode="a",
                     format='%(message)s')
-    command =args[i]
-    _, stdout, stderr = client.exec_command(command)
+    _, stdout, stderr = connexion().exec_command(command)
     output = stdout.read().decode("utf-8")
     for line in output.splitlines():
             logging.info(line)
+
+
+args= ["free","top","ps","vmstat","ifconfig -a","cat /proc/meminfo", "cat /proc/cpuinfo","iotop"]
+for i in range(0,len(args)):
+    get_data(args[i])
