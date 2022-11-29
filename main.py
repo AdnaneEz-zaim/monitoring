@@ -22,10 +22,6 @@ print("Configuration succesfully loaded !")
 cmd="ls"
 outlock = threading.Lock()
 def workon(id):
-    ssh = paramiko.SSHClient()
-    ssh.load_system_host_keys()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(machines_hostnames[id], username=machines_usernames[id], password=machines_passwords[id], port=machines_ports[id])
     _, stdout, stderr = ssh.exec_command(cmd)
     output = stdout.read().decode("utf-8")
 
