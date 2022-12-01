@@ -9,5 +9,5 @@ class Connexion :
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
         self.client.connect(hostname=self.monitor.hostname, username=self.monitor.username, password=self.monitor.password, port=self.monitor.port)
         
-    def getClient():
+    def getClient(self):
         return self.client
