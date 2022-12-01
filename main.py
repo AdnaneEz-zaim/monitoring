@@ -21,7 +21,7 @@ def get_data(command):
     _, stdout, stderr = client.exec_command(command)
     output = stdout.read().decode("utf-8")
     for line in output.splitlines():
-            #print(line)
+            print(line)
 
             object = DataServerLog(line)
             list_data.append(object)
@@ -35,8 +35,8 @@ def get_data(command):
 #     print(i)
 
 get_data("cat /var/log/apache2/other_vhosts_access.log")
-
-print(len(list_data))
-for i in range(0, len(list_data)):
-    print(list_data[i].get)
+#
+# print(len(list_data))
+# for i in range(0, len(list_data)):
+#     print(list_data[i].getLogLineData)
 

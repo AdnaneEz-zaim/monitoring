@@ -5,7 +5,7 @@ class DataServerLog:
 
     def __init__(self, raw_line):
 
-        self.line_parser=apache_log_parser.make_parser("%a %A %r %t %T")
+        self.line_parser=apache_log_parser.make_parser("%h %A %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"")
         self.log_line_data = self.line_parser(raw_line)
         pprint(self.log_line_data)
 
