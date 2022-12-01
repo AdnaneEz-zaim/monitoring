@@ -10,4 +10,5 @@ class Connexion :
         self.client.connect(hostname=self.monitor.hostname, username=self.monitor.username, password=self.monitor.password, port=self.monitor.port)
         
     def getClient(self):
+        print(self.client)
         return self.client
