@@ -26,7 +26,7 @@ def get_data(command):
     _, stdout, stderr = client.exec_command(command)
     output = stdout.read().decode("utf-8")
     for line in output.splitlines():
-        #print(line)
+        print(line)
         ApacheLogLine = LogParser(line)
         list_data.append(ApacheLogLine.getLogLineData())
 
