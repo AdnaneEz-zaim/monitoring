@@ -1,8 +1,7 @@
-import configparser
-from pprint import pprint
-
-import paramiko.ssh_exception
-import sys, os, string, threading, logging
+"""
+ Main program
+ """
+import logging
 from models.class_config import Config
 from models.class_connexion import Connexion
 from models.class_ApacheServerLogParser import LogParser
@@ -23,12 +22,17 @@ list_data = []
 
 
 def get_data(command):
+    """
+    Get the command output on the remote client
+    :param command: command line execute on the remote client
+    """
     _, stdout, stderr = client.exec_command(command)
     output = stdout.read().decode("utf-8")
+    error = stderr.read().decode("utf-8")
     for line in output.splitlines():
         print(line)
-        ApacheLogLine = LogParser(line)
-        list_data.append(ApacheLogLine.getLogLineData())
+        apache_log_line = LogParser(line)
+        list_data.append(apache_log_line.getLogLineData())
 
 
 # args= ["free","top","ps","vmstat","ifconfig -a","cat /proc/meminfo", "cat /proc/cpuinfo","iotop"]
@@ -43,6 +47,3 @@ print("Time when 404 error occurred in interval : ",
       dataServerInfo.getTimeStatusCode("2022-11-30T00:00:00", "2022-12-02T00:00:00", 404))
 print("Time when remote client connection occurred : ",
       dataServerInfo.getTimeRemoteClientAccess("2022-11-30T00:00:00", "2022-12-02T00:00:00"))
-# print(len(list_data))
-# for i in range(0, len(list_data)):
-#     print(list_data[i].getLogLineData)
