@@ -1,11 +1,15 @@
 import configparser
+import os.path
+import sys
 
 
 class Config:
 
     def __init__(self, id):
         # CONFIGURATION FILE PATH
-        path_configFile = "config.ini"
+        absolute_path = os.path.dirname(__file__)
+        relative_path = "../config.ini"
+        path_configFile = os.path.join(absolute_path,relative_path)
 
         # Loading configuration file ----------------------------------------
         config = configparser.ConfigParser()
