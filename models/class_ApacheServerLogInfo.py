@@ -11,6 +11,7 @@ class LogInfo:
             if log['status'] == str(statuscode) and date_start <= log['time_received_isoformat'] <= date_end:
                 res_list.append(log["time_received_isoformat"])
 
+        print(res_list)
         return res_list
 
     def getTimeRemoteClientAccess(self, date_start, date_end):  # date format : 2022-06-01T09:20:28 (iso)

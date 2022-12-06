@@ -22,17 +22,15 @@ list_data = []
 
 
 def get_data(command):
-    """
-    Get the command output on the remote client
-    :param command: command line execute on the remote client
-    """
+    result = []
     _, stdout, stderr = client.exec_command(command)
     output = stdout.read().decode("utf-8")
     error = stderr.read().decode("utf-8")
     for line in output.splitlines():
         print(line)
-        apache_log_line = LogParser(line)
-        list_data.append(apache_log_line.getLogLineData())
+        ApacheLogLine = LogParser(line)
+        result.append(ApacheLogLine.getLogLineData())
+    return result
 
 
 # args= ["free","top","ps","vmstat","ifconfig -a","cat /proc/meminfo", "cat /proc/cpuinfo","iotop"]
@@ -40,10 +38,10 @@ def get_data(command):
 #     get_data(args[i])
 #     print(i)
 
-get_data("cat /var/log/apache2/other_vhosts_access.log")
+list_data = get_data("cat /var/log/apache2/other_vhosts_access.log")
 dataServerInfo = LogInfo(list_data)
 
 print("Time when 404 error occurred in interval : ",
-      dataServerInfo.getTimeStatusCode("2022-11-30T00:00:00", "2022-12-02T00:00:00", 404))
+      dataServerInfo.getTimeStatusCode("2022-11-30T00:00:00", "2022-12-07T00:00:00", 404))
 print("Time when remote client connection occurred : ",
       dataServerInfo.getTimeRemoteClientAccess("2022-11-30T00:00:00", "2022-12-02T00:00:00"))
