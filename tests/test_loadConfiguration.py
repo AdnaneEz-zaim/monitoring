@@ -23,6 +23,5 @@ class Test(unittest.TestCase):
     def test_getPort(self):
         self.assertEqual(self.monitorTest.get_port(), "22113")
 
-
 if __name__ == '__main__':
     unittest.main()
