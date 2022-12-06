@@ -21,7 +21,6 @@ class Test(unittest.TestCase):
         self.assertEqual(self.monitorTest.get_password(), "113-TgBT-3784")
 
     def test_getPort(self):
-        monitorTest = Config(0)
         self.assertEqual(self.monitorTest.get_port(), "22113")
 
 
