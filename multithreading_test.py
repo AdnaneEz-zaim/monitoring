@@ -1,12 +1,14 @@
-import sys, os, string, threading,configparser
-import paramiko
+""" Fichier test multithreading"""
+
+import threading, configparser  
 
 # CONFIGURATION FILE PATH
-path_configFile = "config.ini"
+
+PATH_CONFIGFILE = "config.ini"
 
 # Loading configuration file ----------------------------------------
 config = configparser.ConfigParser()
-config.read(path_configFile)
+config.read(PATH_CONFIGFILE)
 
 machines_hostnames = config['monitored_machines']['hostnames'].split(';')
 machines_usernames = config['monitored_machines']['usernames'].split(';')
@@ -19,10 +21,11 @@ print(machines_passwords)
 print(machines_ports)
 print("Configuration succesfully loaded !")
 
-cmd="ls"
+CMD = "ls"
 outlock = threading.Lock()
 def workon(id):
-    _, stdout, stderr = ssh.exec_command(cmd)
+    """ Method wich executes commands on the ID machine"""
+    _, stdout = ssh.exec_command(CMD)
     output = stdout.read().decode("utf-8")
 
     with outlock:
@@ -33,15 +36,15 @@ def workon(id):
 
 
 threads = []
-machine_id = 0
+MACHINE_ID = 0
 
 for h in machines_hostnames:
     t = threading.Thread(
         target=workon,
-        args=(machine_id,)
+        args=(MACHINE_ID,)
     )
     t.start()
     threads.append(t)
-    machine_id = machine_id+1
+    MACHINE_ID = MACHINE_ID+1
 for t in threads:
     t.join()
