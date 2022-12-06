@@ -22,14 +22,18 @@ list_data = []
 
 
 def get_data(command):
+    """
+    :param command:
+    :return List:
+    """
     result = []
     _, stdout, stderr = client.exec_command(command)
     output = stdout.read().decode("utf-8")
     error = stderr.read().decode("utf-8")
     for line in output.splitlines():
         print(line)
-        ApacheLogLine = LogParser(line)
-        result.append(ApacheLogLine.getLogLineData())
+        apache_log_line = LogParser(line)
+        result.append(apache_log_line.getLogLineData())
     return result
 
 
