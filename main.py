@@ -39,10 +39,10 @@ def get_data(command):
 get_data("cat /var/log/apache2/other_vhosts_access.log")
 dataServerInfo = LogInfo(list_data)
 
-print("Time when 404 error occurred in interval : ",
-      dataServerInfo.getTimeStatusCode("2022-11-30T00:00:00", "2022-12-02T00:00:00", 404))
+print("Time when 402 error occurred in interval : ",
+      dataServerInfo.getTimeStatusCode("2022-11-30T00:00:00", "2022-12-07T00:00:00", 404))
 print("Time when remote client connection occurred : ",
-      dataServerInfo.getTimeRemoteClientAccess("2022-11-30T00:00:00", "2022-12-02T00:00:00"))
+      dataServerInfo.getTimeRemoteClientAccess("2022-11-30T00:00:00", "2022-12-07   T00:00:00"))
 # print(len(list_data))
 # for i in range(0, len(list_data)):
 #     print(list_data[i].getLogLineData)
