@@ -12,6 +12,7 @@ image: python:latest
 # only cache local items.
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  TEST_DIR: "$CI_PROJECT_DIR/tests"
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/topics/caching/
@@ -23,15 +24,39 @@ cache:
     - .cache/pip
     - venv/
 
+stages:
+  - test
+  - exec
+
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
 
-test:
+test_configuration:
+  stage: test
+  script : 
+    - python test_configuration.py test
+
+test_connection:
+  stage: test
+  script : 
+    - python test_connexion.py test
+
+test_apacheLogParser:
+  stage: test
+  script : 
+    - python test_apacheLogParser.py test
+
+test_apacheLogInfo:
+  stage: test
   script:
-    - python setup.py test
+    - python test_apacheLogInfo.py test
+
+
+
+
 
 
 
