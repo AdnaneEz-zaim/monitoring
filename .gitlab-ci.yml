@@ -41,22 +41,22 @@ before_script:
 test_loadConfiguration:
   stage: test
   script:
-    - python3 -m tests/test_loadConfiguration.py
+    - python3 -m tests/test_loadConfiguration
 
 test_connexion:
   stage: test
   script:
-    - python3 -m tests/test_connexion.py
+    - python3 -m tests/test_connexion
 
 test_apacheLogParser:
   stage: test
   script:
-    - python3 -m tests/test_apacheLogParser.py
+    - python3 -m tests/test_apacheLogParser
 
 test_apacheLogInfo:
   stage: test
   script: 
-    - python3 -m tests/test_apacheLogInfo.py
+    - python3 -m tests/test_apacheLogInfo
 
 
 
