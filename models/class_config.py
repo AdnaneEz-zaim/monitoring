@@ -1,19 +1,18 @@
+"""Program for the config class """
 import configparser
 import os.path
-import sys
-
 
 class Config:
-
+    """Class to define the config of the machines"""
     def __init__(self, id):
         # CONFIGURATION FILE PATH
         absolute_path = os.path.dirname(__file__)
         relative_path = "../config.ini"
-        path_configFile = os.path.join(absolute_path,relative_path)
+        path_config_file = os.path.join(absolute_path,relative_path)
 
         # Loading configuration file ----------------------------------------
         config = configparser.ConfigParser()
-        config.read(path_configFile)
+        config.read(path_config_file)
 
         machines_hostnames = config['monitored_machines']['hostnames'].split(';')
         machines_usernames = config['monitored_machines']['usernames'].split(';')
@@ -37,13 +36,17 @@ class Config:
 
     # getter method
     def get_hostname(self):
+        """method to get the hostname"""
         return self.hostname
 
     def get_username(self):
+        """method to get username"""
         return self.username
 
     def get_password(self):
+        """method to get password"""
         return self.password
 
     def get_port(self):
+        """method to get port"""
         return self.port

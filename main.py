@@ -33,7 +33,7 @@ def get_data(command):
     for line in output.splitlines():
         print(line)
         apache_log_line = LogParser(line)
-        result.append(apache_log_line.getLogLineData())
+        result.append(apache_log_line.get_log_line_data())
     return result
 
 
