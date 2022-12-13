@@ -32,7 +32,6 @@ cache:
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
-  - pip install unittest
   - pip install apache-log-parser
   - pip install configParser
   - pip install paramiko
