@@ -45,12 +45,12 @@ test_loadConfiguration:
   script:
     - python3 -m unittest tests/test_loadConfiguration.py
 
-test_connexion:
-  stage: test
-  before_script:
-    - pip install paramiko
-  script:
-    - python3 -m unittest tests/test_connexion.py
+#test_connexion:
+#  stage: test
+#  before_script:
+#    - pip install paramiko
+#  script:
+#    - python3 -m unittest tests/test_connexion.py
 
 test_apacheLogParser:
   stage: test
