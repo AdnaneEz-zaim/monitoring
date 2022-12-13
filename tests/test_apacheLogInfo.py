@@ -1,7 +1,9 @@
 import unittest
 from models.class_ApacheServerLogInfo import LogInfo
 from models.class_ApacheServerLogParser import LogParser
+
 class Test(unittest.TestCase):
+    """Class made to test if the class ApacheServerLogInfo working well"""
     def setUp(self):
         self.list_data = [
             'localhost:80 127.0.0.1 - - [06/Dec/2022:14:00:01 +0000] "GET /wp-cron.php HTTP/1.1" 200 131 "-" "Mozilla/5.0"',
@@ -17,7 +19,9 @@ class Test(unittest.TestCase):
             self.result.append(ApacheLogLine.getLogLineData())
         self.dataServerInfo = LogInfo(self.result)
     
-    def test_getTimeStatusCode(self):
+    def test_get_time_status_code(self):
+        """Method testing the method for time status code"""
         self.assertEqual(len(self.dataServerInfo.getTimeStatusCode("2022-11-30T00:00:00", "2022-12-07T00:00:00", 404)),2)
-    def test_getTimeRemoteClientAccess(self):
+    def test_get_time_remote_client_access(self):
+        """Method testing the method for the time remote client access"""
         self.assertEqual(len(self.dataServerInfo.getTimeRemoteClientAccess("2022-11-30T00:00:00", "2022-12-07T00:00:00")),5)
