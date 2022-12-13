@@ -4,6 +4,9 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml
 
+stages:
+  - test
+
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
 image: python:latest
@@ -24,6 +27,8 @@ cache:
     - .cache/pip
     - venv/
 
+
+
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
@@ -33,9 +38,25 @@ before_script:
   - virtualenv venv
   - source venv/bin/activate
 
-test:
-  script : 
-    - python3 -m unittest
+test_loadConfiguration:
+  stage: test
+  script:
+    - python3 -m tests/test_loadConfiguration.py
+
+test_connexion:
+  stage: test
+  script:
+    - python3 -m tests/test_connexion.py
+
+test_apacheLogParser:
+  stage: test
+  script:
+    - python3 -m tests/test_apacheLogParser.py
+
+test_apacheLogInfo:
+  stage: test
+  script: 
+    - python3 -m tests/test_apacheLogInfo.py
 
 
 
