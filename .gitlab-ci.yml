@@ -67,9 +67,10 @@ test_apacheLogInfo:
     - python3 -m unittest tests/test_apacheLogInfo.py
 
 pylint:
-  stage:test
+  stage:
+    - test
   before_script:
-    - mkdir -p public/badges public/test_loadConfiguration
+    - mkdir -p public/badges public/lint
     - echo undefined > public/badges/$CI_JOB_NAME.score
     - pip install pylint-gitlab
 
