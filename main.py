@@ -33,7 +33,7 @@ def get_data(command):
     for line in output.splitlines():
         print(line)
         apache_log_line = LogParser(line)
-        result.append(apache_log_line.getLogLineData())
+        result.append(apache_log_line.get_log_line_data())
     return result
 
 
@@ -45,7 +45,10 @@ def get_data(command):
 list_data = get_data("cat /var/log/apache2/other_vhosts_access.log")
 dataServerInfo = LogInfo(list_data)
 
-print("Time when 404 error occurred in interval : ",
-      dataServerInfo.getTimeStatusCode("2022-11-30T00:00:00", "2022-12-07T00:00:00", 404))
+print("Time when 402 error occurred in interval : ",
+      dataServerInfo.get_time_status_code("2022-11-30T00:00:00", "2022-12-07T00:00:00", 404))
 print("Time when remote client connection occurred : ",
-      dataServerInfo.getTimeRemoteClientAccess("2022-11-30T00:00:00", "2022-12-02T00:00:00"))
+      dataServerInfo.get_time_remote_client_access("2022-11-30T00:00:00", "2022-12-07   T00:00:00"))
+# print(len(list_data))
+# for i in range(0, len(list_data)):
+#     print(list_data[i].getLogLineData)
