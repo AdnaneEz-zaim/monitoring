@@ -31,13 +31,16 @@ stages:
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
+  - pip install apache-log-parser
+  - pip install configParser
+  - pip install paramiko
   - virtualenv venv
   - source venv/bin/activate
 
 test_configuration:
   stage: test
   script : 
-    - python tests/test_configuration.py test
+    - python tests/test_loadConfiguration.py test
 
 test_connection:
   stage: test
