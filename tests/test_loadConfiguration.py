@@ -1,12 +1,14 @@
+""" Fichier test loadConfiguration"""
+
 import unittest
 from models.class_config import Config
 
-
 class Test(unittest.TestCase):
+    """ Class test configuration loaded """
 
     # Call before each test
     def setUp(self):
-       self.monitorTest = Config(0)
+       self.monitor_test = Config(0)
 
     def test_constructor(self):
         self.assertTrue(self.monitorTest)
