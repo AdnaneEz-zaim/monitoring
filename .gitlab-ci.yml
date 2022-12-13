@@ -32,6 +32,7 @@ cache:
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
+  - pip install unittest
   - pip install apache-log-parser
   - pip install configParser
   - pip install paramiko
@@ -41,22 +42,22 @@ before_script:
 test_loadConfiguration:
   stage: test
   script:
-    - python3 -m tests/test_loadConfiguration
+    - python3 -m unittest tests/test_loadConfiguration.py
 
 test_connexion:
   stage: test
   script:
-    - python3 -m tests/test_connexion
+    - python3 -m unittest tests/test_connexion.py
 
 test_apacheLogParser:
   stage: test
   script:
-    - python3 -m tests/test_apacheLogParser
+    - python3 -m unittest tests/test_apacheLogParser.py
 
 test_apacheLogInfo:
   stage: test
   script: 
-    - python3 -m tests/test_apacheLogInfo
+    - python3 -m unittest tests/test_apacheLogInfo.py
 
 
 
