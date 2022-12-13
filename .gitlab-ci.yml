@@ -40,21 +40,29 @@ before_script:
 
 test_loadConfiguration:
   stage: test
+  before_script:
+    - pip install configParser
   script:
     - python3 -m unittest tests/test_loadConfiguration.py
 
 test_connexion:
   stage: test
+  before_script:
+    - pip install paramiko
   script:
     - python3 -m unittest tests/test_connexion.py
 
 test_apacheLogParser:
   stage: test
+  before_script:
+    - pip install apache-log-parser
   script:
     - python3 -m unittest tests/test_apacheLogParser.py
 
 test_apacheLogInfo:
   stage: test
+  before_script:
+    - pip install apache-log-parser
   script: 
     - python3 -m unittest tests/test_apacheLogInfo.py
 
