@@ -37,22 +37,22 @@ before_script:
 test_configuration:
   stage: test
   script : 
-    - python test_configuration.py test
+    - python tests/test_configuration.py test
 
 test_connection:
   stage: test
   script : 
-    - python test_connexion.py test
+    - python tests/test_connexion.py test
 
 test_apacheLogParser:
   stage: test
   script : 
-    - python test_apacheLogParser.py test
+    - python tests/test_apacheLogParser.py test
 
 test_apacheLogInfo:
   stage: test
   script:
-    - python test_apacheLogInfo.py test
+    - python tests/test_apacheLogInfo.py test
 
 
 
