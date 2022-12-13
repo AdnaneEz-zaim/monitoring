@@ -24,10 +24,6 @@ cache:
     - .cache/pip
     - venv/
 
-stages:
-  - test
-  - exec
-
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
@@ -37,25 +33,10 @@ before_script:
   - virtualenv venv
   - source venv/bin/activate
 
-test_configuration:
-  stage: test
+test:
   script : 
-    - python tests/test_loadConfiguration.py test
+    - python3 -m unittest
 
-test_connection:
-  stage: test
-  script : 
-    - python tests/test_connexion.py test
-
-test_apacheLogParser:
-  stage: test
-  script : 
-    - python tests/test_apacheLogParser.py test
-
-test_apacheLogInfo:
-  stage: test
-  script:
-    - python tests/test_apacheLogInfo.py test
 
 
 
