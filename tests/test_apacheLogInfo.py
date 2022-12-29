@@ -1,7 +1,7 @@
 """Program to test apacheLogInfo class"""
 import unittest
-from models.class_ApacheServerLogInfo import LogInfo
-from models.class_ApacheServerLogParser import LogParser
+from models.ApacheServerLogInfo import LogInfo
+from models.ApacheServerLogParser import LogParser
 
 class Test(unittest.TestCase):
     """Class made to test if the class ApacheServerLogInfo working well"""

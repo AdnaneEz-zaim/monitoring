@@ -6,10 +6,10 @@ import csv
 import os
 import time
 
-from models.class_config import Config
-from models.class_connexion import Connexion
+from models.ConfigurationLoader import Config
+from models.Connexion import Connexion
 from models.MonitorThreading import MonitorTreading
-from models.class_ApacheServerLogInfo import LogInfo
+from models.ApacheServerLogInfo import LogInfo
 
 machineConfiguration = Config()
 nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()

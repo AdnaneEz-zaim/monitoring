@@ -1,6 +1,6 @@
 """ Fichier test loadConfiguration"""
 import unittest
-from models.class_config import Config
+from models.ConfigurationLoader import Config
 
 class Test(unittest.TestCase):
     """ Class test configuration loaded """

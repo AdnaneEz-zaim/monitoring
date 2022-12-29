@@ -2,8 +2,8 @@ import unittest
 
 import paramiko.ssh_exception
 
-from models.class_connexion import Connexion
-from models.class_config import Config
+from models.Connexion import Connexion
+from models.ConfigurationLoader import Config
 class Test(unittest.TestCase):
 
     # Call before each test
