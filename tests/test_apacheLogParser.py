@@ -1,7 +1,7 @@
 """Test of ApacheServerLogParser """
 
 import unittest
-from models.class_ApacheServerLogParser import LogParser
+from models.ApacheServerLogParser import LogParser
 class Test(unittest.TestCase):
     """Class to test methods from ApacheServerLogParser class"""
     def test_get_log_line_data(self):
