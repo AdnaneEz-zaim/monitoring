@@ -8,7 +8,8 @@ class Test(unittest.TestCase):
 
     # Call before each test
     def setUp(self):
-       self.monitorTest = Config(0)
+        self.configurations = Config()
+        self.monitorTest = self.configurations.loadMachineConfiguration(0)
 
     def test_createClient(self):
         try:

@@ -4,49 +4,46 @@ import os.path
 
 class Config:
     """Class to define the config of the machines"""
-    def __init__(self, id):
+    def __init__(self):
         # CONFIGURATION FILE PATH
         absolute_path = os.path.dirname(__file__)
         relative_path = "../config.ini"
-        path_config_file = os.path.join(absolute_path,relative_path)
+        path_config_file = os.path.join(absolute_path, relative_path)
 
         # Loading configuration file ----------------------------------------
         config = configparser.ConfigParser()
         config.read(path_config_file)
 
-        machines_hostnames = config['monitored_machines']['hostnames'].split(';')
-        machines_usernames = config['monitored_machines']['usernames'].split(';')
-        machines_passwords = config['monitored_machines']['passwords'].split(';')
-        machines_ports = config['monitored_machines']['ports'].split(';')
+        self.machines_hostnames = config['monitored_machines']['hostnames'].split(';')
+        self.machines_usernames = config['monitored_machines']['usernames'].split(';')
+        self.machines_passwords = config['monitored_machines']['passwords'].split(';')
+        self.machines_ports = config['monitored_machines']['ports'].split(';')
 
-        print("-----------------[Machine" + str(id) + "]-----------------")
-        print(machines_hostnames[id])
-        print(machines_usernames[id])
-        print(machines_passwords[id])
-        print(machines_ports[id])
+        # Set the number of machine configurations
+        self.nbMachineConfig = min(len(self.machines_hostnames),
+                                   len(self.machines_usernames),
+                                   len(self.machines_passwords),
+                                   len(self.machines_ports))
 
-        print("Machine" + str(id) + " configuration successfully loaded !")
-        print("--------------------------------------------")
-
-        # Init attributes
-        self.hostname = machines_hostnames[id]
-        self.username = machines_usernames[id]
-        self.password = machines_passwords[id]
-        self.port = machines_ports[id]
+        print("Loaded " + str(self.nbMachineConfig) + " machine configurations")
 
     # getter method
-    def get_hostname(self):
-        """method to get the hostname"""
-        return self.hostname
+    def loadMachineConfiguration(self, id):
+        """method that return all the authentication credential associated to the given id"""
+        if id < self.nbMachineConfig:
+            print("-----------------[Machine" + str(id) + "]-----------------")
+            print(self.machines_hostnames[id])
+            print(self.machines_usernames[id])
+            print(self.machines_passwords[id])
+            print(self.machines_ports[id])
 
-    def get_username(self):
-        """method to get username"""
-        return self.username
+            print("Machine" + str(id) + " configuration successfully loaded !")
+            print("--------------------------------------------")
 
-    def get_password(self):
-        """method to get password"""
-        return self.password
+            # Return authentication credential
+            return self.machines_hostnames[id], self.machines_usernames[id], self.machines_passwords[id], self.machines_ports[id]
 
-    def get_port(self):
-        """method to get port"""
-        return self.port
+    def getNbMachineConfigurations(self):
+        """ return the number of machine configuration loaded from the config.ini file"""
+        return self.nbMachineConfig
+
