@@ -18,11 +18,12 @@ class Test(unittest.TestCase):
         for line in self.list_data:
             apache_log_line = LogParser(line)
             self.result.append(apache_log_line.get_log_line_data())
-        self.data_server_info = LogInfo(self.result)
+        self.data_server_info = LogInfo()
+        self.data_server_info.set_list_data(self.result)
     def test_get_time_status_code(self):
         """Method testing the method for time status code"""
-        self.assertEqual(len(self.data_server_info.get_time_status_code("2022-11-30T00:00:00", "2022-12-07T00:00:00", 404)),2)
+        self.assertEqual(len(self.data_server_info.get_time_status_code(404)),2)
     def test_get_time_remote_client_access(self):
         """Method testing the method for the time remote client access"""
-        self.assertEqual(len(self.data_server_info.get_time_remote_client_access("2022-11-30T00:00:00", "2022-12-07T00:00:00")),5)
+        self.assertEqual(len(self.data_server_info.get_time_remote_client_access()),4)
         
