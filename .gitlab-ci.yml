@@ -17,6 +17,7 @@ image: python:latest
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   TEST_DIR: "$CI_PROJECT_DIR/tests"
+  PROJECT_ROOT: "$CI_PROJECT_DIR"
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/topics/caching/
@@ -70,7 +71,7 @@ linter:
   before_script:
     - pip install pylint
   script:
-    - pylint $CI_PROJECT_DIR
+    - pylint $PROJECT_ROOT
 
 
 
