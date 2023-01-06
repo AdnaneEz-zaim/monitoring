@@ -35,3 +35,14 @@ class LogInfo:
     def get_list_data(self):
         """method that gets the list data log"""
         return self.list_data_log
+
+    def get_request_url(self):
+        """method that gets the request url"""
+        res_list = []
+        for log in self.list_data_log:
+            list=[]
+            list.append(log["time_received_isoformat"])
+            list.append(log["request_url"])
+            res_list.append(list)
+        return res_list
+
