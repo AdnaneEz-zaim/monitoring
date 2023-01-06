@@ -18,6 +18,7 @@ from models.ConfigurationLoader import Config
 from models.Connexion import Connexion
 from models.MonitorThreading import MonitorTreading
 from models.ApacheServerLogInfo import LogInfo
+import models.Dash as dashboard
 
 machineConfiguration = Config()
 nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
@@ -25,7 +26,6 @@ monitors = []
 connexions = []
 clients = []
 logInfos = []
-csv_fileNames = []
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -48,6 +48,7 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(message)s'
                     )
 
+
 def get_data():
     while True:
         # Starting one thread for each client
@@ -63,7 +64,6 @@ def get_data():
 
         # Get result from thread when they have finish their tasks
         for t in MonitorThreads:
-
             t.join()
 
             # Get Monitoring hardware usage results
@@ -75,6 +75,7 @@ def get_data():
 
         # APACHE LOG -----------------------------------------------------
         # CSV Filling
+        csv_fileNames = []
         for host_id in range(nbMachineConfiguration):
             csv_filename = machineConfiguration.machines_hostnames[host_id] \
                            + '_apacheLog_statusCode404' \
@@ -89,7 +90,6 @@ def get_data():
 
                     # Write header in the first line of the CSV file
                     csv_writer.writerow(['Date', 'OCCURRENCE'])
-
 
             # Open the csv file created before in add mode
             with open(csv_filename, 'a', newline='') as f:
@@ -136,7 +136,7 @@ def get_data():
                     csv_writer = csv.writer(f)
 
                     # Write header in the first line of the CSV file
-                    csv_writer.writerow(['Date','CPU_USAGE','MEM_USAGE','STO_USAGE'])
+                    csv_writer.writerow(['Date', 'CPU_USAGE', 'MEM_USAGE', 'STO_USAGE'])
 
             # Open the csv file created before in add mode
             with open(csv_filename, 'a', newline='') as f:
@@ -147,50 +147,39 @@ def get_data():
                 csv_writer.writerow(hardwareUsageResults[host_id])
 
         print("DATA SCRAPPING DONE")
-        update_server_metrics()
+        update_server_metrics(csv_fileNames)
         time.sleep(5)
 
-def update_server_metrics():
 
-    # Our dataframe
-    df = pd.read_csv("leodagan.telecomste.net_hardwareUsage.csv")
-    fig = px.line(df, x="Date", y="CPU_USAGE")
-    fig.update_traces(mode='lines')
+def update_server_metrics(list_csv):
+    list_figCpuUsage = []
+    list_dfCpuUsage = []
+    for csv_name in list_csv:
+        # Our dataframe
+        if "_hardwareUsage" in csv_name:
+            df = pd.read_csv(csv_name)
+            list_dfCpuUsage.append(df)
+            fig = px.scatter(df, x="Date", y="CPU_USAGE")
+            fig.update_traces(mode='lines')
+            list_figCpuUsage.append([fig, csv_name])
 
-    df2 = pd.read_csv("seli.telecomste.net_hardwareUsage.csv")
-    print(float(df2['CPU_USAGE'][df2['CPU_USAGE'].size - 1]))
-    fig2 = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = float(df2['CPU_USAGE'][df2['CPU_USAGE'].size - 1]),
-        gauge={'axis': {'range': [0, 100]},
-               'steps': [
-                   {'range': [0, 50], 'color': "orange"},
-                   {'range': [50, 100], 'color': "red"}],
-               'threshold': {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 90}}))
-    fig2.update_traces()
-
-    app.layout = html.Div(children=[
-        html.H1(children='HARDWARE USAGES'),
-
-        html.Div(children='''
-            MONITOR 1.
-        '''),
-
-        dcc.Graph(
-            id='monitor1-graph',
-            figure=fig
-        ),
-
-        html.Div(children='''
-        MONITOR 2.
-    '''),
-
-        dcc.Graph(
-            id='monitor2-graph',
-            figure=fig2
-        )
-
-    ])
+    list_layout = []
+    for i in range(len(list_figCpuUsage)):
+        if i != len(list_figCpuUsage)-1:
+            app.layout = html.Div(children=[
+                html.H2(children='HARDWARE USAGES'),
+                html.Div(children="'''" + list_figCpuUsage[i][1].split("_")[0] + "'''"),
+                dashboard.generate_graph(list_figCpuUsage[i][0]),
+            ])
+        else:
+            app.layout = html.Div(children=[
+                html.H2(children='HARDWARE USAGES'),
+                html.Div(children="'''" + list_figCpuUsage[i][1].split("_")[0] + "'''"),
+                dashboard.generate_graph(list_figCpuUsage[i][0])
+            ])
+        list_layout.append(app.layout)
+    for layout in list_layout:
+        app.layout += layout
 
     print("DASH UPDATED")
 
@@ -201,5 +190,3 @@ dataScrapperThread = threading.Thread(target=get_data)
 dataScrapperThread.start()
 
 app.run_server()
-
-
