@@ -44,5 +44,6 @@ class LogInfo:
             list.append(log["time_received_isoformat"])
             list.append(log["request_url"])
             res_list.append(list)
+            
         return res_list
 
