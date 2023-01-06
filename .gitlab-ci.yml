@@ -66,7 +66,7 @@ test_apacheLogInfo:
     - python3 -m unittest tests/test_apacheLogInfo.py
 
 linter:
-  stage: pylint
+  stage: lint
   before_script:
     - pip install pylint
   script:
