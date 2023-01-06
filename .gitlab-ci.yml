@@ -6,6 +6,7 @@
 
 stages:
   - test
+  - lint
 
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
@@ -26,8 +27,6 @@ cache:
   paths:
     - .cache/pip
     - venv/
-
-
 
 before_script:
   - python --version  # For debugging
@@ -65,6 +64,13 @@ test_apacheLogInfo:
     - pip install apache-log-parser
   script: 
     - python3 -m unittest tests/test_apacheLogInfo.py
+
+linter:
+  stage: pylint
+  before_script:
+    - pip install pylint
+  script:
+    - pylint $CI_PROJECT_DIR
 
 
 
