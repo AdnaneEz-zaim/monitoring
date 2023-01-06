@@ -19,6 +19,7 @@ from models.Connexion import Connexion
 from models.MonitorThreading import MonitorTreading
 from models.ApacheServerLogInfo import LogInfo
 import models.Dash as dashboard
+from plotly.subplots import make_subplots
 
 machineConfiguration = Config()
 nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
@@ -153,33 +154,32 @@ def get_data():
 
 def update_server_metrics(list_csv):
     list_figCpuUsage = []
-    list_dfCpuUsage = []
+    list_layout = []
+
+    header_layout = html.Div(children=[
+        html.H1(children="Global Dashboard")
+    ])
+    list_layout.append(header_layout)
+
     for csv_name in list_csv:
-        # Our dataframe
+        # HARDWARE USAGE FRAME
         if "_hardwareUsage" in csv_name:
             df = pd.read_csv(csv_name)
-            list_dfCpuUsage.append(df)
-            fig = px.scatter(df, x="Date", y="CPU_USAGE")
-            fig.update_traces(mode='lines')
-            list_figCpuUsage.append([fig, csv_name])
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
+            fig.add_trace(go.Scatter(x=df['Date'], y=df['CPU_USAGE'], name="CPU_USAGE"))
+            fig.add_trace(go.Scatter(x=df['Date'], y=df['MEM_USAGE'], name="MEM_USAGE"))
+            fig.add_trace(go.Scatter(x=df['Date'], y=df['STO_USAGE'], name="STO_USAGE"))
 
-    list_layout = []
-    for i in range(len(list_figCpuUsage)):
-        if i != len(list_figCpuUsage)-1:
-            app.layout = html.Div(children=[
-                html.H2(children='HARDWARE USAGES'),
-                html.Div(children="'''" + list_figCpuUsage[i][1].split("_")[0] + "'''"),
-                dashboard.generate_graph(list_figCpuUsage[i][0]),
+            # Create layout hardware usage
+            hardware_layout = html.Div(children=[
+                html.H2(children=csv_name.split("_")[0]),
+                html.Div(children=''' Hardware usage '''),
+                dashboard.generate_graph(fig),
             ])
-        else:
-            app.layout = html.Div(children=[
-                html.H2(children='HARDWARE USAGES'),
-                html.Div(children="'''" + list_figCpuUsage[i][1].split("_")[0] + "'''"),
-                dashboard.generate_graph(list_figCpuUsage[i][0])
-            ])
-        list_layout.append(app.layout)
-    for layout in list_layout:
-        app.layout += layout
+
+            list_layout.append(hardware_layout)
+
+    app.layout = html.Div(children=list_layout)
 
     print("DASH UPDATED")
 
