@@ -9,7 +9,7 @@ stages:
 
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: python:latest
+image: python-docker-test
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -27,21 +27,13 @@ cache:
     - .cache/pip
     - venv/
 
-
-
 before_script:
   - python --version  # For debugging
-  - pip install virtualenv
-  - pip install apache-log-parser
-  - pip install configParser
-  - pip install paramiko
   - virtualenv venv
   - source venv/bin/activate
 
 test_loadConfiguration:
   stage: test
-  before_script:
-    - pip install configParser
   script:
     - python3 -m unittest tests/test_loadConfiguration.py
 
@@ -54,19 +46,13 @@ test_loadConfiguration:
 
 test_apacheLogParser:
   stage: test
-  before_script:
-    - pip install apache-log-parser
   script:
     - python3 -m unittest tests/test_apacheLogParser.py
 
 test_apacheLogInfo:
   stage: test
-  before_script:
-    - pip install apache-log-parser
   script: 
     - python3 -m unittest tests/test_apacheLogInfo.py
-
-
 
 
 
