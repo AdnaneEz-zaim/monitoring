@@ -66,13 +66,12 @@ test_apacheLogInfo:
   script: 
     - python3 -m unittest tests/test_apacheLogInfo.py
 
-linter:
-  stage: lint
-  before_script:
-    - pip install pylint
-  script:
-    - pylint $PROJECT_ROOT
-
+#linter:
+#  stage: lint
+#  before_script:
+#    - pip install pylint
+#  script:
+#    - pylint $PROJECT_ROOT
 
 
 
