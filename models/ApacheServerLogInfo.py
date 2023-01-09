@@ -1,3 +1,4 @@
+from datetime import datetime
 class LogInfo:
     """Class that classes infos about errors and client connections """
     def __init__(self):
@@ -17,8 +18,14 @@ class LogInfo:
         res_list = []
         for log in self.list_data_log:
             if log['status'] == str(statuscode) and self.starting_date_statusCode < log['time_received_isoformat']:
-                res_list.append(log["time_received_isoformat"])
+                res = [log["time_received_isoformat"],1]
+                res_list.append(res)
                 self.starting_date_statusCode = log["time_received_isoformat"]
+            else :
+                date = datetime.now()
+                res = [str(date),0]
+                res_list.append(res)
+                self.starting_date_statusCode = date
 
         return res_list
 
@@ -29,7 +36,6 @@ class LogInfo:
             if log['remote_ip'] != "127.0.0.1" and self.starting_date_clientConnection < log['time_received_isoformat']:
                 res_list.append(log["time_received_isoformat"])
                 self.starting_date_clientConnection = log["time_received_isoformat"]
-
         return res_list
 
     def get_list_data(self):

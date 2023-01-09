@@ -120,9 +120,9 @@ def get_data():
                 # Create a CSV writer object
                 csv_writer = csv.writer(f)
 
-                # Write the data in the CSV file
+                # Write the data in the CSV file          
                 for value in apache_clientConnect_results[host_id]:
-                    csv_writer.writerow([value, 1])
+                    csv_writer.writerow(value)
 
         # Hardware usage ---------------------------------------
         # CSV Filling
@@ -178,6 +178,22 @@ def update_server_metrics(list_csv):
             ])
 
             list_layout.append(hardware_layout)
+
+        #CLIENTCONNECT USAGE FRAME
+        if "clientConnect" in csv_name:
+            df = pd.read_csv(csv_name)
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
+            fig.add_trace(go.Scatter(x=df['Date'], y=df['OCCURRENCE'], name="OCCURRENCE"))
+
+            # Create layout hardware usage
+            hardware_layout = html.Div(children=[
+                html.H2(children=csv_name.split("_")[0]),
+                html.Div(children=''' Connections of clients '''),
+                dashboard.generate_graph(fig),
+            ])
+
+            list_layout.append(hardware_layout)
+
 
     app.layout = html.Div(children=list_layout)
 
