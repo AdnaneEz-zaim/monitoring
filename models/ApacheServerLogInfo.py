@@ -1,4 +1,6 @@
 from datetime import datetime
+from pprint import pprint
+
 class LogInfo:
     """Class that classes infos about errors and client connections """
     def __init__(self):
@@ -16,16 +18,23 @@ class LogInfo:
     def get_time_status_code(self, statuscode):
         """method that gets the time status code"""
         res_list = []
+
+
         for log in self.list_data_log:
-            if log['status'] == str(statuscode) and self.starting_date_statusCode < log['time_received_isoformat']:
-                res = [log["time_received_isoformat"],1]
-                res_list.append(res)
-                self.starting_date_statusCode = log["time_received_isoformat"]
-            else :
-                date = datetime.now()
-                res = [str(date),0]
-                res_list.append(res)
-                self.starting_date_statusCode = date
+            print("AVANT")
+            print(self.starting_date_statusCode)
+            if self.starting_date_statusCode >= log['time_received_isoformat']:
+                if log['status'] == str(statuscode):
+                    res = [log["time_received_isoformat"],1]
+                    res_list.append(res)
+                
+                else :
+                    res = [log["time_received_isoformat"],0]
+                    res_list.append(res)
+
+            self.starting_date_statusCode = log["time_received_isoformat"]
+            print("Apres")
+            print(self.starting_date_statusCode)
 
         return res_list
 

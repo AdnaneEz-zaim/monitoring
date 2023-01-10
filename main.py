@@ -98,8 +98,8 @@ def get_data():
                 csv_writer = csv.writer(f)
 
                 # Write the data in the CSV file
-                for value in apache_statusCode_results[host_id]:
-                    csv_writer.writerow([value, 1])
+                data = apache_statusCode_results[host_id][0]                
+                csv_writer.writerow(data)
 
             csv_filename = machineConfiguration.machines_hostnames[host_id] \
                            + '_apacheLog_clientConnect' \
@@ -121,8 +121,7 @@ def get_data():
                 csv_writer = csv.writer(f)
 
                 # Write the data in the CSV file          
-                for value in apache_clientConnect_results[host_id]:
-                    csv_writer.writerow(value)
+                csv_writer.writerow(apache_clientConnect_results[host_id])
 
         # Hardware usage ---------------------------------------
         # CSV Filling
