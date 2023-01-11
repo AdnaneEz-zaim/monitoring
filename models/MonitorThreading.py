@@ -1,4 +1,5 @@
 import threading
+from pprint import pprint
 from datetime import datetime
 from models.ApacheServerLogParser import LogParser
 from models.ApacheServerLogInfo import LogInfo
@@ -10,7 +11,6 @@ def appendDataLine(data):
         res.append(line)
     return res
 
-
 class MonitorTreading(threading.Thread):
     def __init__(self, client, id, logInfo):
         threading.Thread.__init__(self)
@@ -18,13 +18,18 @@ class MonitorTreading(threading.Thread):
         self.id = id
         self.apache_statusCode_result = None
         self.apache_clientConnect_result = None
+        self.apache_requestUrl_result = None
         self.hardwareUsage_result = None
+        self.uptime_result = None
+        self.CPU_name_result = None
         self.logInfo = logInfo
 
     def run(self):
         # The method workon will be launch in a thread
         self.workon_apache()
         self.workon_hardwareUsage()
+        self.workon_uptime()
+        self.workon_CPU_name()
 
     def get_data(self, command):
         """Return the output of the command execute on the remote monitor.
@@ -54,6 +59,7 @@ class MonitorTreading(threading.Thread):
         # Find final result
         self.apache_statusCode_result = self.logInfo.get_time_status_code(404)
         self.apache_clientConnect_result = self.logInfo.get_time_remote_client_access()
+        self.apache_requestUrl_result = self.logInfo.get_request_url()
 
 
     def workon_hardwareUsage(self):
@@ -72,3 +78,13 @@ class MonitorTreading(threading.Thread):
 
         # Join data
         self.hardwareUsage_result = [date, cpu_used, mem_used, sto_used]
+
+    def workon_uptime(self):
+        uptime = appendDataLine(self.get_data("uptime | awk -F'( |,|:)+' '{print $6,$7}'"))
+
+        # Join data
+        self.uptime_result = uptime
+
+    def workon_CPU_name(self):
+        cpu_name = appendDataLine(self.get_data("grep \"model name\" /proc/cpuinfo | head -1 | cut -d \" \" -f 3-"))
+        self.CPU_name_result = cpu_name
