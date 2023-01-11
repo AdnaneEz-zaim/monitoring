@@ -2,24 +2,16 @@
  Main program
  """
 import logging
-import csv
-import os
 import threading
 import time
-
 import dash
-from dash import dcc
-from dash import html
-import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
 
 from models.ConfigurationLoader import Config
 from models.Connexion import Connexion
 from models.MonitorThreading import MonitorTreading
 from models.ApacheServerLogInfo import LogInfo
-import models.Dash as dashboard
-from plotly.subplots import make_subplots
+from models.CSVFiller import fill_csv
+import models.Dash as Dashboard
 
 machineConfiguration = Config()
 nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
@@ -62,6 +54,9 @@ def get_data():
         hardwareUsageResults = []
         apache_statusCode_results = []
         apache_clientConnect_results = []
+        apache_requestUrl_results = []
+        uptime_serverResults = []
+        cpuModel_server = []
 
         # Get result from thread when they have finish their tasks
         for t in MonitorThreads:
@@ -70,131 +65,75 @@ def get_data():
             # Get Monitoring hardware usage results
             hardwareUsageResults.append(t.hardwareUsage_result)
 
+            # Get uptime
+            uptime_serverResults.append(t.uptime_result)
+
+            # Get CPU_name
+            cpuModel_server.append(t.CPU_name_result)
+
             # Get monitoring apache log results
             apache_statusCode_results.append(t.apache_statusCode_result)
             apache_clientConnect_results.append(t.apache_clientConnect_result)
+            apache_requestUrl_results.append(t.apache_requestUrl_result)
 
-        # APACHE LOG -----------------------------------------------------
+        print("DATA SCRAPPING DONE")
+
         # CSV Filling
         csv_fileNames = []
         for host_id in range(nbMachineConfiguration):
+            # APACHE LOG -----------------------------------------------------
+            # CSV Error code
             csv_filename = machineConfiguration.machines_hostnames[host_id] \
                            + '_apacheLog_statusCode404' \
                            + '.csv'
             csv_fileNames.append(csv_filename)
 
-            # Create a csv file in write mode if not already exist
-            if not os.path.exists(csv_filename):
-                with open(csv_filename, 'w', newline='') as f:
-                    # Create a CSV writer object
-                    csv_writer = csv.writer(f)
+            fill_csv(csv_filename, apache_statusCode_results, host_id)
 
-                    # Write header in the first line of the CSV file
-                    csv_writer.writerow(['Date', 'OCCURRENCE'])
-
-            # Open the csv file created before in add mode
-            with open(csv_filename, 'a', newline='') as f:
-                # Create a CSV writer object
-                csv_writer = csv.writer(f)
-
-                # Write the data in the CSV file
-                data = apache_statusCode_results[host_id][0]                
-                csv_writer.writerow(data)
-
+            # CSV Client connect
             csv_filename = machineConfiguration.machines_hostnames[host_id] \
                            + '_apacheLog_clientConnect' \
                            + '.csv'
             csv_fileNames.append(csv_filename)
 
-            # Create a csv file in write mode if not already exist
-            if not os.path.exists(csv_filename):
-                with open(csv_filename, 'w', newline='') as f:
-                    # Create a CSV writer object
-                    csv_writer = csv.writer(f)
+            fill_csv(csv_filename, apache_clientConnect_results, host_id)
 
-                    # Write header in the first line of the CSV file
-                    csv_writer.writerow(['Date', 'OCCURRENCE'])
+            # CSV URL request
+            csv_filename = machineConfiguration.machines_hostnames[host_id] \
+                           + '_apacheLog_requestUrl' \
+                           + '.csv'
+            csv_fileNames.append(csv_filename)
 
-            # Open the csv file created before in add mode
-            with open(csv_filename, 'a', newline='') as f:
-                # Create a CSV writer object
-                csv_writer = csv.writer(f)
+            fill_csv(csv_filename, apache_requestUrl_results, host_id)
 
-                # Write the data in the CSV file          
-                csv_writer.writerow(apache_clientConnect_results[host_id])
-
-        # Hardware usage ---------------------------------------
-        # CSV Filling
-        for host_id in range(nbMachineConfiguration):
+            # Hardware usage ---------------------------------------
             csv_filename = machineConfiguration.machines_hostnames[host_id] + '_hardwareUsage' + '.csv'
             csv_fileNames.append(csv_filename)
 
-            # Create a csv file in write mode if not already exist
-            if not os.path.exists(csv_filename):
-                with open(csv_filename, 'w', newline='') as f:
-                    # Create a CSV writer object
-                    csv_writer = csv.writer(f)
+            fill_csv(csv_filename, hardwareUsageResults, host_id)
 
-                    # Write header in the first line of the CSV file
-                    csv_writer.writerow(['Date', 'CPU_USAGE', 'MEM_USAGE', 'STO_USAGE'])
+        print("CSV FILLING DONE")
 
-            # Open the csv file created before in add mode
-            with open(csv_filename, 'a', newline='') as f:
-                # Create a CSV writer object
-                csv_writer = csv.writer(f)
-
-                # Write the data in the CSV file
-                csv_writer.writerow(hardwareUsageResults[host_id])
-
-        print("DATA SCRAPPING DONE")
-        update_server_metrics(csv_fileNames)
+        update_server_metrics(csv_fileNames, uptime_serverResults, cpuModel_server)
         time.sleep(5)
 
 
-def update_server_metrics(list_csv):
-    list_figCpuUsage = []
-    list_layout = []
+def update_server_metrics(list_csv, uptime_serverResults, cpuModel_server):
+    list_layout = [Dashboard.genetate_header_layout()]
 
-    header_layout = html.Div(children=[
-        html.H1(children="Global Dashboard")
-    ])
-    list_layout.append(header_layout)
+    # For every monitored machines
+    for host_id in range(nbMachineConfiguration):
 
-    for csv_name in list_csv:
-        # HARDWARE USAGE FRAME
-        if "_hardwareUsage" in csv_name:
-            df = pd.read_csv(csv_name)
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-            fig.add_trace(go.Scatter(x=df['Date'], y=df['CPU_USAGE'], name="CPU_USAGE"))
-            fig.add_trace(go.Scatter(x=df['Date'], y=df['MEM_USAGE'], name="MEM_USAGE"))
-            fig.add_trace(go.Scatter(x=df['Date'], y=df['STO_USAGE'], name="STO_USAGE"))
+        # Get all csv file name that start with the currrent machine hostname
+        csv_hostname = machineConfiguration.machines_hostnames[host_id]
+        filtered_csv_list = [s for s in list_csv if s.startswith(csv_hostname)]
 
-            # Create layout hardware usage
-            hardware_layout = html.Div(children=[
-                html.H2(children=csv_name.split("_")[0]),
-                html.Div(children=''' Hardware usage '''),
-                dashboard.generate_graph(fig),
-            ])
+        # For every csv in this list
+        for csv_name in filtered_csv_list:
+            list_layout.append(
+                Dashboard.generate_layout_brick(csv_name, uptime_serverResults, cpuModel_server, host_id))
 
-            list_layout.append(hardware_layout)
-
-        #CLIENTCONNECT USAGE FRAME
-        if "clientConnect" in csv_name:
-            df = pd.read_csv(csv_name)
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-            fig.add_trace(go.Scatter(x=df['Date'], y=df['OCCURRENCE'], name="OCCURRENCE"))
-
-            # Create layout hardware usage
-            hardware_layout = html.Div(children=[
-                html.H2(children=csv_name.split("_")[0]),
-                html.Div(children=''' Connections of clients '''),
-                dashboard.generate_graph(fig),
-            ])
-
-            list_layout.append(hardware_layout)
-
-
-    app.layout = html.Div(children=list_layout)
+    app.layout = Dashboard.generate_app_layout(list_layout)
 
     print("DASH UPDATED")
 
