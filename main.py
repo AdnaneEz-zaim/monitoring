@@ -142,5 +142,4 @@ def update_server_metrics(list_csv, uptime_serverResults, cpuModel_server):
 dataScrapperThread = threading.Thread(target=get_data)
 # Start the data scrapper thread
 dataScrapperThread.start()
-
 app.run_server()
