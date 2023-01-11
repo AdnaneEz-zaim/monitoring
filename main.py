@@ -23,11 +23,7 @@ logInfos = []
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-colors = {
-    'background': '#F0F8FF',
-    'text': '#00008B'
-}
+app.title = "GROUP 6 Server Monitoring Dashboard"
 
 # Init
 for m in range(nbMachineConfiguration):
@@ -126,15 +122,22 @@ def update_server_metrics(list_csv, uptime_serverResults, cpuModel_server):
 
         # Get all csv file name that start with the currrent machine hostname
         csv_hostname = machineConfiguration.machines_hostnames[host_id]
+        
+        # Get csv of current hostname
         filtered_csv_list = [s for s in list_csv if s.startswith(csv_hostname)]
+        # Get hardware csv of current hostname
+        hardware_csv_list = [csvName for csvName in filtered_csv_list if "hardware" in csvName]
+        # Get apache csv of current hostname
+        apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
+        
+        # Generate hostname title layout
+        list_layout.append(Dashboard.generate_hostname_title(csv_hostname, uptime_serverResults, host_id))
 
-        list_layout.append(Dashboard.generate_hostname_title(csv_hostname))
+        # Generate layout for hardware usage
+        list_layout.append(Dashboard.generate_layout_hardware(hardware_csv_list, cpuModel_server, host_id))
 
-        # For every csv in this list
-        for csv_name in filtered_csv_list:
-
-            list_layout.append(
-                Dashboard.generate_layout_brick(csv_name, uptime_serverResults, cpuModel_server, host_id))
+        # Generate layout for apache log
+        list_layout.append(Dashboard.generate_layout_apache(apache_csv_list, host_id))
 
     app.layout = Dashboard.generate_app_layout(list_layout)
 

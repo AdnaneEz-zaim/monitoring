@@ -1,101 +1,217 @@
 from dash import Dash, html, dcc
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
-
-def generate_table(dataframe, max_rows=10):
-    return html.Table([
-        html.Thead(
-            html.Tr([html.Th(col) for col in dataframe.columns])
-        ),
-        html.Tbody([
-            html.Tr([
-                html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-            ]) for i in range(min(len(dataframe), max_rows))
-        ])
-    ])
-
-
-def generate_graph(fig):
-    return dcc.Graph(
-        id="fig",
-        figure=fig
-    )
 
 
 def generate_header_layout():
     header_layout = html.Div(children=[
-        html.H1(children="Global Dashboard")
-    ])
+        html.H1(children="Global Dashboard",
+                className="header-title",
+                )
+
+        ],
+        className="header"
+    )
     return header_layout
 
 
-def generate_hostname_title(hostname):
+def generate_hostname_title(hostname, uptime_serverResults, host_id):
     hostname_layout = html.Div(children=[
-        html.H2(children=hostname)
+        html.H2(children=hostname, className="hostname"),
+        html.H6(children="Uptime : " + str(uptime_serverResults[host_id][0]), className="uptime")
     ])
     return hostname_layout
 
 
-def generate_layout_brick(csv_name, uptime_serverResults, cpuModel_server, host_id):
+def generate_layout_hardware(hardware_csv_list, cpuModel_server, host_id):
     # HARDWARE USAGE FRAME
-    if "_hardwareUsage" in csv_name:
+    for csv_name in hardware_csv_list:
+
         df = pd.read_csv(csv_name)
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['CPU_USAGE'], name="CPU_USAGE"))
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['MEM_USAGE'], name="MEM_USAGE"))
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['STO_USAGE'], name="STO_USAGE"))
 
         # Create layout hardware usage
-        uptime = "Uptime : " + str(uptime_serverResults[host_id])
-        cpuModel = "CPU Model : " + str(cpuModel_server[host_id])
-        hardware_layout = html.Div(children=[
-            html.H6(children=uptime),
-            html.H6(children=cpuModel),
-            html.Div(children=''' Hardware usage '''),
-            generate_graph(fig),
-        ])
-
+        cpuModel = str(cpuModel_server[host_id][0])
+        hardware_layout = \
+            html.Div(
+                children=[
+                    dcc.Graph(
+                        id="cpu-usage-graph",
+                        figure={
+                            "data": [
+                                {
+                                    "x": df["Date"],
+                                    "y": df["CPU_USAGE"],
+                                    "type": "lines",
+                                    "hovertemplate": "%{y:.2f}%"
+                                                     "<extra></extra>",
+                                },
+                            ],
+                            "layout": {
+                                "title": {
+                                    "text": "CPU usage [" + cpuModel + "]",
+                                    "x": 0.05,
+                                    "xanchor": "left",
+                                },
+                                "xaxis": {"fixedrange": False},
+                                "yaxis": {
+                                    "ticksuffix": "%",
+                                    "fixedrange": False,
+                                },
+                                "colorway": ["#17B897"],
+                            },
+                        },
+                    ),
+                    dcc.Graph(
+                        id="mem-usage-graph",
+                        figure={
+                            "data": [
+                                {
+                                    "x": df["Date"],
+                                    "y": df["MEM_USAGE"],
+                                    "type": "lines",
+                                    "hovertemplate": "%{y:.2f}%"
+                                                     "<extra></extra>",
+                                },
+                            ],
+                            "layout": {
+                                "title": {
+                                    "text": "Memory usage",
+                                    "x": 0.05,
+                                    "xanchor": "left",
+                                },
+                                "xaxis": {"fixedrange": False},
+                                "yaxis": {
+                                    "ticksuffix": "%",
+                                    "fixedrange": False,
+                                },
+                                "colorway": ["#9b59b6"],
+                            },
+                        },
+                    ),
+                    dcc.Graph(
+                        id="sto-usage-graph",
+                        figure={
+                            "data": [
+                                {
+                                    "x": df["Date"],
+                                    "y": df["STO_USAGE"],
+                                    "type": "lines",
+                                    "hovertemplate": "%{y:.2f}%"
+                                                     "<extra></extra>",
+                                },
+                            ],
+                            "layout": {
+                                "title": {
+                                    "text": "Storage usage",
+                                    "x": 0.05,
+                                    "xanchor": "left",
+                                },
+                                "xaxis": {"fixedrange": False},
+                                "yaxis": {
+                                    "ticksuffix": "%",
+                                    "fixedrange": False,
+                                },
+                                "colorway": ["#3498db"],
+                            },
+                        },
+                    ),
+                ],
+                className="card",
+            )
         return hardware_layout
+    return html.Div(children=[])
 
-    elif "apacheLog_statusCode404" in csv_name:
-        df = pd.read_csv(csv_name)
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['OCCURRENCE'], name="ERROR 404"))
+def generate_layout_apache(list_csvname, host_id):
 
-        # Create layout status code
-        apache_statusCode_layout = html.Div(children=[
-            html.Div(children=''' Status code 404 '''),
-            generate_graph(fig),
-        ])
+    df_list = []
+    for csvApache in list_csvname:
+        df_list.append(pd.read_csv(csvApache))
 
-        return apache_statusCode_layout
-    elif "apacheLog_clientConnect" in csv_name:
-        df = pd.read_csv(csv_name)
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['OCCURRENCE'], name="client connection"))
+        # Create layout apache log
 
-        # Create layout status code
-        apache_clientConnect_layout = html.Div(children=[
-            html.Div(children=''' Client connections '''),
-            generate_graph(fig),
-        ])
+    if len(df_list) == 3:
+        apache_layout = \
+            html.Div(
+                children=[
+                    dcc.Graph(
+                        id="error-code-graph",
+                        figure={
+                            "data": [
+                                {
+                                    "x": df_list[0]["Date"],
+                                    "y": df_list[0]["OCCURRENCE"],
+                                    "type": "bar",
+                                    "hovertemplate": "%{y:.2f}"
+                                                     "<extra></extra>",
+                                },
+                            ],
+                            "layout": {
+                                "title": {
+                                    "text": "Error code 404",
+                                    "x": 0.05,
+                                    "xanchor": "left",
+                                },
+                                "xaxis": {"fixedrange": False},
+                                "yxaxis": {"fixedrange": False},
+                                "colorway": ["#e74c3c"],
+                            },
+                        },
+                    ),
+                    dcc.Graph(
+                        id="client-connect-graph",
+                        figure={
+                            "data": [
+                                {
+                                    "x": df_list[1]["Date"],
+                                    "y": df_list[1]["OCCURRENCE"],
+                                    "type": "bar",
+                                    "hovertemplate": "%{y:.2f}"
+                                                     "<extra></extra>",
+                                },
+                            ],
+                            "layout": {
+                                "title": {
+                                    "text": "Client connections",
+                                    "x": 0.05,
+                                    "xanchor": "left",
+                                },
+                                "xaxis": {"fixedrange": False},
+                                "yaxis": {"fixedrange": False},
 
-        return apache_clientConnect_layout
-    elif "_apacheLog_requestUrl" in csv_name:
-        df = pd.read_csv(csv_name)
-        fig = px.bar(df, x='URL', y='OCCURRENCE')
+                                "colorway": ["#16a085"],
+                            },
+                        },
+                    ),
+                    dcc.Graph(
+                        id="sto-usage-graph",
+                        figure={
+                            "data": [
+                                {
+                                    "x": df_list[2]["URL"],
+                                    "y": df_list[2]["OCCURRENCE"],
+                                    "type": "bar",
+                                    "hovertemplate": "%{y:.2f}"
+                                                     "<extra></extra>",
+                                },
+                            ],
+                            "layout": {
+                                "title": {
+                                    "text": "URL Request",
+                                    "x": 0.05,
+                                    "xanchor": "left",
+                                },
+                                "xaxis": {"fixedrange": False},
+                                "yaxis": {"fixedrange": False},
 
-        # Create layout status code
-        apache_requestUrl_layout = html.Div(children=[
-            html.Div(children=''' Request url '''),
-            generate_graph(fig),
-        ])
-        return apache_requestUrl_layout
-    else:
-        return html.Div(children=[])
+                                "colorway": ["#f39c12"],
+                            },
+                        },
+                    ),
+                ],
+                className="card",
+            )
+        return apache_layout
+
+    return html.Div(children=[])
 
 
 def generate_app_layout(list_layout):
