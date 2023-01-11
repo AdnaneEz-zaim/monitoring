@@ -241,4 +241,5 @@ cython_debug/
 .ionide
 
 # CSV
-.csv
+*.csv
+

@@ -119,7 +119,7 @@ def get_data():
 
 
 def update_server_metrics(list_csv, uptime_serverResults, cpuModel_server):
-    list_layout = [Dashboard.genetate_header_layout()]
+    list_layout = [Dashboard.generate_header_layout()]
 
     # For every monitored machines
     for host_id in range(nbMachineConfiguration):
@@ -128,8 +128,11 @@ def update_server_metrics(list_csv, uptime_serverResults, cpuModel_server):
         csv_hostname = machineConfiguration.machines_hostnames[host_id]
         filtered_csv_list = [s for s in list_csv if s.startswith(csv_hostname)]
 
+        list_layout.append(Dashboard.generate_hostname_title(csv_hostname))
+
         # For every csv in this list
         for csv_name in filtered_csv_list:
+
             list_layout.append(
                 Dashboard.generate_layout_brick(csv_name, uptime_serverResults, cpuModel_server, host_id))
 
