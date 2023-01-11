@@ -1,0 +1,4 @@
+virtualenv
+apache-log-parser
+configParser
+paramiko
