@@ -29,7 +29,23 @@ body {
     color: green;
     text-align:center;
 }
-
+.serverOverview {
+  display: flex;
+  justify-content: space-around;
+}
+.titleOverview {
+  text-align: center;
+}
+.serverPanel {
+  border-radius: 25px;
+  border: 3px solid #73AD21;
+  margin-right:10px;
+}
+.serverPanel h3 {
+    text-align: center;
+    color: black;
+    padding:20px;
+}
 .card{
     display: flex;
     justify-content: space-between;

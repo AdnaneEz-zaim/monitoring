@@ -27,15 +27,20 @@ def generate_homePage_layout():
             ],
         className="topleftnav"
         ),
-
-
             dash.page_container
     ])
 
 
     return home_layout
 
-
+def generate_serverOverviewPanel(hostname):
+    panel_layout = html.Div(
+        [
+            html.H3(hostname)
+        ],
+        className="serverPanel"
+    )
+    return panel_layout
 def generate_monitoring_layout():
     machineConfiguration = Config()
     nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
