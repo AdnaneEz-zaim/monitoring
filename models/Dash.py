@@ -1,17 +1,98 @@
+import dash
+from models.ConfigurationLoader import Config
 from dash import Dash, html, dcc
 import pandas as pd
 
+def generate_homePage_layout():
+    home_layout = html.Div(children=[
+        html.Div(
+            [
+                html.H1(children="Group 6 Server monitoring",
+                        className="header-title",
+                        )
 
-def generate_header_layout():
-    header_layout = html.Div(children=[
-        html.H1(children="Global Dashboard",
-                className="header-title",
+            ],
+            className="header"
+        ),
+        html.Div(
+            [
+                html.Div(
+                    dcc.Link(
+                        f"{page['name']}", href=page["relative_path"]
+                    )
+
                 )
 
-    ],
-        className="header"
-    )
-    return header_layout
+                for page in dash.page_registry.values()
+            ],
+        className="topleftnav"
+        ),
+
+
+            dash.page_container
+    ])
+
+
+    return home_layout
+
+
+def generate_monitoring_layout():
+    machineConfiguration = Config()
+    nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
+    csv_fileNames = [[] for _ in range(nbMachineConfiguration)]
+    for h in range(nbMachineConfiguration):
+        # CREATE CSV NAMES
+        # APACHE LOG -----------------------------------------------------
+        # CSV Error code
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_statusCode404' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
+
+        # CSV Client connect
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_clientConnect' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
+
+        # CSV URL request
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_requestUrl' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
+
+        # Hardware usage ---------------------------------------
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_hardwareUsage' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
+
+    list_layout = []
+
+    # For every monitored machines
+    for host_id in range(nbMachineConfiguration):
+        # Get all csv file name that start with the currrent machine hostname
+        csv_hostname = machineConfiguration.machines_hostnames[host_id]
+
+        # Get csv of current hostname
+        filtered_csv_list = [s for s in csv_fileNames[host_id] if s.startswith(csv_hostname)]
+        # Get hardware csv of current hostname
+        hardware_csv_list = [csvName for csvName in filtered_csv_list if "hardware" in csvName]
+        # Get apache csv of current hostname
+        apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
+
+        # Generate hostname title layout
+        list_layout.append(generate_hostname_title(csv_hostname, "NULL", host_id))
+
+        # Generate layout for hardware usage
+        list_layout.append(generate_layout_hardware(hardware_csv_list, "NULL", host_id))
+
+        # Generate layout for apache log
+        list_layout.append(generate_layout_apache(apache_csv_list, host_id))
+
+    list_layout.append(generate_interval_component())
+
+    return list_layout
 
 
 def generate_interval_component():
@@ -325,8 +406,8 @@ def update_hardware_usage(csvName, cpuModel_server):
 
     return figures
 
-def update_apache_log(list_csvname, host_id):
 
+def update_apache_log(list_csvname, host_id):
     figures = []
 
     df_list = []
@@ -335,78 +416,79 @@ def update_apache_log(list_csvname, host_id):
 
     fig_error = {
         "data": [
-         {
-             "x": df_list[0]["Date"],
-             "y": df_list[0]["OCCURRENCE"],
-             "type": "bar",
-             "hovertemplate": "%{y} %{x}"
-                              "<extra></extra>",
-         },
+            {
+                "x": df_list[0]["Date"],
+                "y": df_list[0]["OCCURRENCE"],
+                "type": "bar",
+                "hovertemplate": "%{y} %{x}"
+                                 "<extra></extra>",
+            },
         ],
         "layout": {
-         "title": {
-             "text": "Error code 404",
-             "x": 0.05,
-             "xanchor": "left",
-         },
-         "xaxis": {"fixedrange": False},
-         "yxaxis": {"fixedrange": False},
-         "colorway": ["#e74c3c"],
+            "title": {
+                "text": "Error code 404",
+                "x": 0.05,
+                "xanchor": "left",
+            },
+            "xaxis": {"fixedrange": False},
+            "yxaxis": {"fixedrange": False},
+            "colorway": ["#e74c3c"],
         },
     }
     figures.append(fig_error)
 
     fig_clientConnections = {
-         "data": [
-             {
-                 "x": df_list[1]["Date"],
-                 "y": df_list[1]["OCCURRENCE"],
-                 "type": "bar",
-                 "hovertemplate": "%{y} %{x}"
-                                  "<extra></extra>",
-             },
-         ],
-         "layout": {
-             "title": {
-                 "text": "Client connections",
-                 "x": 0.05,
-                 "xanchor": "left",
-             },
-             "xaxis": {"fixedrange": False},
-             "yaxis": {"fixedrange": False},
+        "data": [
+            {
+                "x": df_list[1]["Date"],
+                "y": df_list[1]["OCCURRENCE"],
+                "type": "bar",
+                "hovertemplate": "%{y} %{x}"
+                                 "<extra></extra>",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "Client connections",
+                "x": 0.05,
+                "xanchor": "left",
+            },
+            "xaxis": {"fixedrange": False},
+            "yaxis": {"fixedrange": False},
 
-             "colorway": ["#16a085"],
-         },
+            "colorway": ["#16a085"],
+        },
     }
 
     figures.append(fig_clientConnections)
 
     fig_requestUrl = {
-                 "data": [
-                     {
-                         "x": df_list[2]["URL"],
-                         "y": df_list[2]["OCCURRENCE"],
-                         "type": "bar",
-                         "hovertemplate": "%{y} %{x}"
-                                          "<extra></extra>",
-                     },
-                 ],
-                 "layout": {
-                     "title": {
-                         "text": "URL Request",
-                         "x": 0.05,
-                         "xanchor": "left",
-                     },
-                     "xaxis": {"fixedrange": False},
-                     "yaxis": {"fixedrange": False},
+        "data": [
+            {
+                "x": df_list[2]["URL"],
+                "y": df_list[2]["OCCURRENCE"],
+                "type": "bar",
+                "hovertemplate": "%{y} %{x}"
+                                 "<extra></extra>",
+            },
+        ],
+        "layout": {
+            "title": {
+                "text": "URL Request",
+                "x": 0.05,
+                "xanchor": "left",
+            },
+            "xaxis": {"fixedrange": False},
+            "yaxis": {"fixedrange": False},
 
-                     "colorway": ["#f39c12"],
-                 },
-             }
+            "colorway": ["#f39c12"],
+        },
+    }
 
     figures.append(fig_requestUrl)
 
     return figures;
+
 
 def update_uptime(uptime_server):
     children = "Uptime : " + str(uptime_server)

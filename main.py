@@ -24,7 +24,7 @@ uptime_serverResults = [None] * nbMachineConfiguration
 cpuModel_server = [None] * nbMachineConfiguration
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True)
 app.title = "GROUP 6 Server Monitoring Dashboard"
 
 # Init
@@ -61,33 +61,9 @@ for h in range(nbMachineConfiguration):
     csv_fileNames[h].append(csv_filename)
 
 
-def createAppLayout(list_csv):
-    list_layout = [Dashboard.generate_header_layout()]
+def createAppLayout():
 
-    # For every monitored machines
-    for host_id in range(nbMachineConfiguration):
-        # Get all csv file name that start with the currrent machine hostname
-        csv_hostname = machineConfiguration.machines_hostnames[host_id]
-
-        # Get csv of current hostname
-        filtered_csv_list = [s for s in list_csv[host_id] if s.startswith(csv_hostname)]
-        # Get hardware csv of current hostname
-        hardware_csv_list = [csvName for csvName in filtered_csv_list if "hardware" in csvName]
-        # Get apache csv of current hostname
-        apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
-
-        # Generate hostname title layout
-        list_layout.append(Dashboard.generate_hostname_title(csv_hostname, "NULL", host_id))
-
-        # Generate layout for hardware usage
-        list_layout.append(Dashboard.generate_layout_hardware(hardware_csv_list, "NULL", host_id))
-
-        # Generate layout for apache log
-        list_layout.append(Dashboard.generate_layout_apache(apache_csv_list, host_id))
-
-    list_layout.append(Dashboard.generate_interval_component())
-
-    app.layout = Dashboard.generate_app_layout(list_layout)
+    app.layout = Dashboard.generate_homePage_layout()
 
     print("DASH LAYOUT CREATED")
 
@@ -194,5 +170,5 @@ dataScrapperThread = threading.Thread(target=get_data)
 # Start the data scrapper thread
 dataScrapperThread.start()
 
-createAppLayout(csv_fileNames)
+createAppLayout()
 app.run_server(debug=True)

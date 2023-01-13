@@ -5,14 +5,38 @@ body {
 
 .header {
     background-color:#222222;
-    margin:-8px;
-    padding:0;
+    margin: -8px;
+    padding: 0px;
 }
 .header-title {
     font-size: 48px;
     color: #ecf0f1;
-    text-align:center;
+    text-align:left;
 }
+
+.link:link {
+    font-size: 48px;
+    color: red;
+    text-align:right;
+    text-decoration: none;
+}
+
+.link:visited {
+    color:green;
+    text-align:right;
+    text-decoration: none;
+}
+.link:visited {
+    color:hotpink;
+    text-align:right;
+    text-decoration: none;
+}
+.link:active {
+    color:blue;
+    text-align:right;
+    text-decoration: none;
+}
+
 .hostname {
     color: #2c3e50;
     text-align:center;
