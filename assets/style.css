@@ -14,25 +14,9 @@ body {
     text-align:left;
 }
 
-.link:link {
+.topleftnav {
     font-size: 48px;
-    color: red;
-    text-align:right;
-    text-decoration: none;
-}
-
-.link:visited {
-    color:green;
-    text-align:right;
-    text-decoration: none;
-}
-.link:visited {
-    color:hotpink;
-    text-align:right;
-    text-decoration: none;
-}
-.link:active {
-    color:blue;
+    color: #ecf0f1;
     text-align:right;
     text-decoration: none;
 }
