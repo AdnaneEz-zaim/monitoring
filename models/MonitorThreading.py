@@ -1,8 +1,6 @@
 import threading
-from pprint import pprint
 from datetime import datetime
 from models.ApacheServerLogParser import LogParser
-from models.ApacheServerLogInfo import LogInfo
 
 
 def appendDataLine(data):

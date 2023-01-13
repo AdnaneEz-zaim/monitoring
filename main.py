@@ -1,7 +1,6 @@
 """
  Main program
  """
-import logging
 import threading
 import time
 import dash
@@ -61,15 +60,10 @@ for h in range(nbMachineConfiguration):
                    + '.csv'
     csv_fileNames[h].append(csv_filename)
 
-logging.basicConfig(level=logging.DEBUG,
-                    filename="monitors.log",
-                    format='%(message)s'
-                    )
 
 def createAppLayout(list_csv):
-    list_layout = []
+    list_layout = [Dashboard.generate_header_layout()]
 
-    list_layout.append(Dashboard.generate_header_layout())
     # For every monitored machines
     for host_id in range(nbMachineConfiguration):
         # Get all csv file name that start with the currrent machine hostname
@@ -97,6 +91,7 @@ def createAppLayout(list_csv):
 
     print("DASH LAYOUT CREATED")
 
+
 def get_data():
     while True:
         # Starting one thread for each client
@@ -110,32 +105,29 @@ def get_data():
         apache_statusCode_results = []
         apache_clientConnect_results = []
         apache_requestUrl_results = []
-        uptime_serverResults.clear()
-        cpuModel_server.clear()
 
         # Get result from thread when they have finish their tasks
+        hostid = 0
         for t in MonitorThreads:
             t.join()
 
             # Get Monitoring hardware usage results
             hardwareUsageResults.append(t.hardwareUsage_result)
 
-            # Get uptime
-            uptime_serverResults.append(t.uptime_result)
-
-            # Get CPU_name
-            cpuModel_server.append(t.CPU_name_result)
+            uptime_serverResults[hostid] = t.uptime_result
+            cpuModel_server[hostid] = t.CPU_name_result
 
             # Get monitoring apache log results
             apache_statusCode_results.append(t.apache_statusCode_result)
             apache_clientConnect_results.append(t.apache_clientConnect_result)
             apache_requestUrl_results.append(t.apache_requestUrl_result)
+            hostid = hostid + 1
 
         print("-[BACKEND]-DATA SCRAPPING DONE")
 
+
         # CSV Filling
         for host_id in range(nbMachineConfiguration):
-
             fill_csv(csv_fileNames[host_id][0], apache_statusCode_results, host_id)
             fill_csv(csv_fileNames[host_id][1], apache_clientConnect_results, host_id)
             fill_csv(csv_fileNames[host_id][2], apache_requestUrl_results, host_id)
@@ -146,18 +138,15 @@ def get_data():
         time.sleep(5)
 
 
-@app.callback(
-        [
-        Output('cpu-usage-graph0', 'figure'),
-        Output('mem-usage-graph0', 'figure'),
-        Output('sto-usage-graph0', 'figure'),
-        Output('cpu-usage-graph1', 'figure'),
-        Output('mem-usage-graph1', 'figure'),
-        Output('sto-usage-graph1', 'figure')
-        ],
-        [Input('interval-component', 'n_intervals')])
+outputs_hardwareUsage = []
+for i in range(nbMachineConfiguration):
+    outputs_hardwareUsage.append(Output(f'cpu-usage-graph{i}', 'figure'))
+    outputs_hardwareUsage.append(Output(f'mem-usage-graph{i}', 'figure'))
+    outputs_hardwareUsage.append(Output(f'sto-usage-graph{i}', 'figure'))
+
+
+@app.callback(outputs_hardwareUsage, [Input('interval-component', 'n_intervals')])
 def update_graph_cpu_usage(n_intervals):
-    print("-[UI]-UPDATE HARDWARE USAGE GRAPH")
     figures = []
     for host_id in range(nbMachineConfiguration):
         update_figures = Dashboard.update_hardware_usage(csv_fileNames[host_id][3], cpuModel_server[host_id][0])
@@ -166,50 +155,34 @@ def update_graph_cpu_usage(n_intervals):
 
     return figures
 
-@app.callback(
-    [
-        Output('error-code-graph0', 'figure'),
-        Output('client-connect-graph0', 'figure'),
-        Output('requestUrl-graph0', 'figure'),
-        Output('error-code-graph1', 'figure'),
-        Output('client-connect-graph1', 'figure'),
-        Output('requestUrl-graph1', 'figure')
-    ],
-    [
-        Input('interval-component','n_intervals')
-    ]
-)
+
+outputs_apache = []
+for i in range(nbMachineConfiguration):
+    outputs_apache.append(Output(f'error-code-graph{i}', 'figure'))
+    outputs_apache.append(Output(f'client-connect-graph{i}', 'figure'))
+    outputs_apache.append(Output(f'requestUrl-graph{i}', 'figure'))
+
+
+@app.callback(outputs_apache, [Input('interval-component', 'n_intervals')])
 def update_graph_apache(n_intervals):
-    print("-[UI]-UPDATE APACHE LOG GRAPH")
     figures = []
     for host_id in range(nbMachineConfiguration):
-
         csv_hostname = machineConfiguration.machines_hostnames[host_id]
-
-        # Get csv of current hostname
         filtered_csv_list = [s for s in csv_fileNames[host_id] if s.startswith(csv_hostname)]
-
-        # Get apache csv of current hostname
         apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
-
         update_figures = Dashboard.update_apache_log(apache_csv_list, host_id)
         for fig in update_figures:
             figures.append(fig)
-
     return figures
 
 
-@app.callback(
-    [
-        Output('uptime0', 'children'),
-        Output('uptime1', 'children')
-    ],
-    [
-        Input('interval-component','n_intervals')
-    ]
-)
+outputs_uptime = []
+for i in range(nbMachineConfiguration):
+    outputs_uptime.append(Output(f'uptime{i}', 'children'))
+
+
+@app.callback(outputs_uptime, [Input('interval-component', 'n_intervals')])
 def update_uptime(n_intervals):
-    print("-[UI]-UPDATE UPTIME ---")
     childrens = []
     for host_id in range(nbMachineConfiguration):
         childrens.append(Dashboard.update_uptime(uptime_serverResults[host_id][0]))
@@ -223,4 +196,3 @@ dataScrapperThread.start()
 
 createAppLayout(csv_fileNames)
 app.run_server(debug=True)
-
