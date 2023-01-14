@@ -30,4 +30,33 @@ body {
     margin-bottom:20px;
 }
 
+.Input-form{
+    padding: 0.5em;
+    margin: 0.5em;
+    color: #3c3c3c;
+    background: #f8f8f8;
+    border: none;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px #3c3c3c;
+    width: 60%;
+    margin-left: 20%;
+    font-size: 20px larger;
+}
+
+.content-centre{
+    position: absolute; /* utilise la position absolue pour centrer l'élément */
+    left: 53%; /* centre horizontalement l'élément */
+    top: 35%;
+    transform: translate(-50%, -50%); /* finit de centrer l'élément */
+}
+
+.button-center{
+    display: flex; /* utilise flexbox pour centrer l'élément */
+    align-items: center; /* centre verticalement l'élément */
+    justify-content: center; /* centre horizontalement l'élément */
+}
+.text-center{
+ text-align: center;
+}
+
 
