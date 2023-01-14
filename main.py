@@ -4,8 +4,9 @@
 import threading
 import time
 import dash
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
-
+from dash import html, dcc
 from models.ConfigurationLoader import Config
 from models.Connexion import Connexion
 from models.MonitorThreading import MonitorTreading
@@ -26,39 +27,6 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True)
 app.title = "GROUP 6 Server Monitoring Dashboard"
-
-# Init
-for h in range(nbMachineConfiguration):
-    monitors.append(machineConfiguration.loadMachineConfiguration(h))
-    connexions.append(Connexion(monitors[h]))
-    clients.append(connexions[h].client)
-    logInfos.append(LogInfo())
-
-    # CREATE CSV NAMES
-    # APACHE LOG -----------------------------------------------------
-    # CSV Error code
-    csv_filename = machineConfiguration.machines_hostnames[h] \
-                   + '_apacheLog_statusCode404' \
-                   + '.csv'
-    csv_fileNames[h].append(csv_filename)
-
-    # CSV Client connect
-    csv_filename = machineConfiguration.machines_hostnames[h] \
-                   + '_apacheLog_clientConnect' \
-                   + '.csv'
-    csv_fileNames[h].append(csv_filename)
-
-    # CSV URL request
-    csv_filename = machineConfiguration.machines_hostnames[h] \
-                   + '_apacheLog_requestUrl' \
-                   + '.csv'
-    csv_fileNames[h].append(csv_filename)
-
-    # Hardware usage ---------------------------------------
-    csv_filename = machineConfiguration.machines_hostnames[h] \
-                   + '_hardwareUsage' \
-                   + '.csv'
-    csv_fileNames[h].append(csv_filename)
 
 
 def get_data():
