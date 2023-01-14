@@ -4,16 +4,39 @@ body {
 }
 
 .header {
-    background-color:#222222;
-    margin:-8px;
-    padding:0;
+    margin: -8px;
+    padding: 0px;
 }
-.header-title {
+.title-header {
+    background-color:#222222;
     font-size: 48px;
     color: #ecf0f1;
     text-align:center;
 }
+
+.topNav {
+    margin: -20px;
+    padding: 0px;
+    background-color:#222222;
+    display : flex;
+    font-size: 48px;
+    justify-content: space-around;
+}
+
+.pageLink {
+    color: white;
+    text-decoration: none;
+    padding:5px;
+    border-radius: 40px;
+}
+.pageLink:hover {
+    background-color: white;
+    color: black;
+    transition-duration: 0.5s;
+}
+
 .hostname {
+    margin-top: 40px;
     color: #2c3e50;
     text-align:center;
 }
@@ -21,13 +44,32 @@ body {
     color: green;
     text-align:center;
 }
-
+.serverOverview {
+    display: flex;
+    justify-content: space-around;
+}
+.titleOverview {
+    margin-top: 40px;
+    text-align: center;
+}
+.serverPanel {
+  border-radius: 25px;
+  border: 3px solid #73AD21;
+  margin-right:10px;
+}
+.serverPanel h2 {
+    text-align: center;
+    color: black;
+    padding:20px;
+}
 .card{
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     box-shadow: rgba(50, 50, 93, 0.25) 2px 6px 12px -2px, rgba(0, 0, 0, 0.3) 2px 3px 7px -3px;
     margin-bottom:20px;
+    margin-left:2%;
+    margin-right:2%;
 }
 
 .Input-form{

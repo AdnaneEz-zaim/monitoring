@@ -29,55 +29,107 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets, use_pages=T
 app.title = "GROUP 6 Server Monitoring Dashboard"
 
 
-def createAppLayout(list_csv):
-    list_layout = [Dashboard.generate_header_layout(),
-        html.H1("Ajouter une machine",className="text-center"),
-        dcc.Input(id='input-1', type='text', placeholder='Entrer un hostname',className='Input-form'),
-        dcc.Input(id='input-2', type='text', placeholder='Entrer un port',className='Input-form'),
-        dcc.Input(id='input-3', type='text', placeholder='Entrer un mot de passe',className='Input-form'),
-        dcc.Input(id='input-4', type='text', placeholder='Entrer un username',className='Input-form'),
-        html.Div(id='output'),
-        html.Div(html.Button('Submit',id='submit-button', n_clicks=0),className="button-center")
+def get_data():
+    while True:
+        # Starting one thread for each client
+        MonitorThreads = []
+        for h in range(nbMachineConfiguration):
+            t = MonitorTreading(clients[h], h, logInfos[h])
+            t.start()
+            MonitorThreads.append(t)
 
-    ]
-    app.layout = Dashboard.generate_app_layout(list_layout)
+        hardwareUsageResults = []
+        apache_statusCode_results = []
+        apache_clientConnect_results = []
+        apache_requestUrl_results = []
 
-    print("DASH LAYOUT CREATED")
+        # Get result from thread when they have finish their tasks
+        hostid = 0
+        for t in MonitorThreads:
+            t.join()
 
-@app.callback(Output('output', 'children'),
-              [Input('submit-button', 'n_clicks')],
-              [Input('input-1', 'value'),
-               Input('input-2', 'value'),
-               Input('input-3', 'value'),
-               Input('input-4', 'value')])
-def get_input_value(n_clicks, input1, input2, input3, input4):
-    if n_clicks == 0:
-        return ''
-    else:
-        # Open the original file
-        with open('config.ini', 'r') as file:
-            # Read all the lines in the file
-            lines = file.readlines()
-            # Open the original file again to write the modified content
-            with open('config.ini', 'w') as file:
-                i=0
-                for line in lines :
-                    if i==0 :
-                        file.write(line)
-                    else :
-                        if i==4:
-                            file.write(line+';'+input4)
-                        else:
-                            content= input1
-                            if i == 2 :
-                                file.write(line[:-1]+';'+input2+'\n')
-                            elif i == 3 :
-                                file.write(line[:-1]+';'+input3+'\n')
-                            else :
-                                file.write(line[:-1]+';'+input1+'\n')
-                    i+=1
-                    
-        return f'Name: {input1}, Email: {input2}, Phone: {input3},adnane: {input4}'
+            # Get Monitoring hardware usage results
+            hardwareUsageResults.append(t.hardwareUsage_result)
 
-createAppLayout(csv_fileNames)
+            uptime_serverResults[hostid] = t.uptime_result
+            cpuModel_server[hostid] = t.CPU_name_result
+
+            # Get monitoring apache log results
+            apache_statusCode_results.append(t.apache_statusCode_result)
+            apache_clientConnect_results.append(t.apache_clientConnect_result)
+            apache_requestUrl_results.append(t.apache_requestUrl_result)
+            hostid = hostid + 1
+
+        print("-[BACKEND]-DATA SCRAPPING DONE")
+
+
+        # CSV Filling
+        for host_id in range(nbMachineConfiguration):
+            fill_csv(csv_fileNames[host_id][0], apache_statusCode_results, host_id)
+            fill_csv(csv_fileNames[host_id][1], apache_clientConnect_results, host_id)
+            fill_csv(csv_fileNames[host_id][2], apache_requestUrl_results, host_id)
+            fill_csv(csv_fileNames[host_id][3], hardwareUsageResults, host_id)
+
+        print("-[BACKEND]-CSV FILLING DONE")
+
+        time.sleep(5)
+
+
+outputs_hardwareUsage = []
+for i in range(nbMachineConfiguration):
+    outputs_hardwareUsage.append(Output(f'cpu-usage-graph{i}', 'figure'))
+    outputs_hardwareUsage.append(Output(f'mem-usage-graph{i}', 'figure'))
+    outputs_hardwareUsage.append(Output(f'sto-usage-graph{i}', 'figure'))
+
+
+@app.callback(outputs_hardwareUsage, [Input('interval-component', 'n_intervals')])
+def update_graph_cpu_usage(n_intervals):
+    figures = []
+    for host_id in range(nbMachineConfiguration):
+        update_figures = Dashboard.update_hardware_usage(csv_fileNames[host_id][3], cpuModel_server[host_id][0])
+        for fig in update_figures:
+            figures.append(fig)
+
+    return figures
+
+
+outputs_apache = []
+for i in range(nbMachineConfiguration):
+    outputs_apache.append(Output(f'error-code-graph{i}', 'figure'))
+    outputs_apache.append(Output(f'client-connect-graph{i}', 'figure'))
+    outputs_apache.append(Output(f'requestUrl-graph{i}', 'figure'))
+
+
+@app.callback(outputs_apache, [Input('interval-component', 'n_intervals')])
+def update_graph_apache(n_intervals):
+    figures = []
+    for host_id in range(nbMachineConfiguration):
+        csv_hostname = machineConfiguration.machines_hostnames[host_id]
+        filtered_csv_list = [s for s in csv_fileNames[host_id] if s.startswith(csv_hostname)]
+        apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
+        update_figures = Dashboard.update_apache_log(apache_csv_list, host_id)
+        for fig in update_figures:
+            figures.append(fig)
+    return figures
+
+
+outputs_uptime = []
+for i in range(nbMachineConfiguration):
+    outputs_uptime.append(Output(f'uptime{i}', 'children'))
+
+
+@app.callback(outputs_uptime, [Input('interval-component', 'n_intervals')])
+def update_uptime(n_intervals):
+    childrens = []
+    for host_id in range(nbMachineConfiguration):
+        childrens.append(Dashboard.update_uptime(uptime_serverResults[host_id][0]))
+    return childrens
+
+
+# Init the data scrapper thread
+dataScrapperThread = threading.Thread(target=get_data)
+# Start the data scrapper thread
+dataScrapperThread.start()
+
+app.layout = Dashboard.generate_header_layout()
 app.run_server(debug=True)
