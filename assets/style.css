@@ -1,4 +1,3 @@
-
 body {
  background-color : #f7f7f7;
 }
@@ -19,7 +18,7 @@ body {
     padding: 0px;
     background-color:#222222;
     display : flex;
-    font-size: 48px;
+    font-size: 34px;
     justify-content: space-around;
 }
 
@@ -72,7 +71,7 @@ body {
     margin-right:2%;
 }
 
-.Input-form{
+.InputForm{
     padding: 0.5em;
     margin: 0.5em;
     color: #3c3c3c;
@@ -85,20 +84,21 @@ body {
     font-size: 20px larger;
 }
 
-.content-centre{
+.contentCentre{
     position: absolute; /* utilise la position absolue pour centrer l'élément */
     left: 53%; /* centre horizontalement l'élément */
     top: 35%;
     transform: translate(-50%, -50%); /* finit de centrer l'élément */
 }
 
-.button-center{
+.buttonSubmit{
     display: flex; /* utilise flexbox pour centrer l'élément */
     align-items: center; /* centre verticalement l'élément */
     justify-content: center; /* centre horizontalement l'élément */
 }
-.text-center{
- text-align: center;
+.titleAddMachine{
+    margin-top:40px;
+    text-align: center;
 }
 
 
