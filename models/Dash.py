@@ -3,44 +3,38 @@ from models.ConfigurationLoader import Config
 from dash import Dash, html, dcc
 import pandas as pd
 
-def generate_homePage_layout():
-    home_layout = html.Div(children=[
-        html.Div(
-            [
-                html.H1(children="Group 6 Server monitoring",
-                        className="header-title",
-                        )
 
-            ],
-            className="header"
-        ),
+def generate_header_layout():
+    home_layout = html.Div(className="header", children=[
+
+        html.H1(className="title-header", children="Group 6 Server Monitoring"),
+
         html.Div(
             [
                 html.Div(
-                    dcc.Link(
-                        f"{page['name']}", href=page["relative_path"]
-                    )
-
+                    dcc.Link(className="pageLink", children=f"{page['name']}", href=page["relative_path"])
                 )
-
                 for page in dash.page_registry.values()
             ],
-        className="topleftnav"
+            className="topNav"
         ),
-            dash.page_container
+        dash.page_container
     ])
-
-
     return home_layout
 
-def generate_serverOverviewPanel(hostname):
+
+def generate_serverOverviewPanel(hostname, uptime_serverResults, h):
+    uptime_id = "uptime" + str(h)
     panel_layout = html.Div(
         [
-            html.H3(hostname)
+            html.H2(hostname),
+            html.H6(children="Uptime : " + str(uptime_serverResults[h][0]), className="uptime", id=uptime_id)
         ],
         className="serverPanel"
     )
     return panel_layout
+
+
 def generate_monitoring_layout():
     machineConfiguration = Config()
     nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
@@ -97,7 +91,7 @@ def generate_monitoring_layout():
 
     list_layout.append(generate_interval_component())
 
-    return list_layout
+    return generate_app_layout(list_layout)
 
 
 def generate_interval_component():
@@ -492,7 +486,7 @@ def update_apache_log(list_csvname, host_id):
 
     figures.append(fig_requestUrl)
 
-    return figures;
+    return figures
 
 
 def update_uptime(uptime_server):

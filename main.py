@@ -61,13 +61,6 @@ for h in range(nbMachineConfiguration):
     csv_fileNames[h].append(csv_filename)
 
 
-def createAppLayout():
-
-    app.layout = Dashboard.generate_homePage_layout()
-
-    print("DASH LAYOUT CREATED")
-
-
 def get_data():
     while True:
         # Starting one thread for each client
@@ -170,5 +163,5 @@ dataScrapperThread = threading.Thread(target=get_data)
 # Start the data scrapper thread
 dataScrapperThread.start()
 
-createAppLayout()
+app.layout = Dashboard.generate_header_layout()
 app.run_server(debug=True)
