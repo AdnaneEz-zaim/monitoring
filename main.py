@@ -62,16 +62,6 @@ for h in range(machineConfiguration.getNbMachineConfigurations()):
                    + '.csv'
     csv_fileNames[h].append(csv_filename)
 
-    # Set callback output
-    outputs_hardwareUsage.append(Output(f'cpu-usage-graph{h}', 'figure'))
-    outputs_hardwareUsage.append(Output(f'mem-usage-graph{h}', 'figure'))
-    outputs_hardwareUsage.append(Output(f'sto-usage-graph{h}', 'figure'))
-    outputs_apache.append(Output(f'error-code-graph{h}', 'figure'))
-    outputs_apache.append(Output(f'client-connect-graph{h}', 'figure'))
-    outputs_apache.append(Output(f'requestUrl-graph{h}', 'figure'))
-    outputs_uptime.append(Output(f'uptime{h}', 'children'))
-
-
 def update_variables():
     global machineConfiguration, nbMachineConfiguration, monitors, connexions, clients, logInfos, csv_fileNames, uptime_serverResults, cpuModel_server
     # Init variables
@@ -169,53 +159,72 @@ dataScrapperThread = threading.Thread(target=get_data)
 dataScrapperThread.start()
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True, suppress_callback_exceptions=True)
 app.title = "GROUP 6 Server Monitoring Dashboard"
 app.layout = Dashboard.generate_header_layout()
 
+@app.callback(
+    Output('server-graph', 'children'),
+    [
+        Input('refresh-graph-button', 'n_clicks'),
+        Input('interval-component', 'n_intervals')
+    ],
+    State('server-graph', 'children')
+)
+def display_graphServerMonitoring(n_clicks, n_intervals, children):
+    print("ADD GRAPH MONITORING")
+    machineConfig = Config()
+    children = []
+    for host in range(machineConfig.getNbMachineConfigurations()):
+        # Title
+        new_titleHostname = Dashboard.generate_hostname_title(machineConfig.machines_hostnames[host], uptime_serverResults, host)
+        # Hardware graph
+        new_graphHardware = Dashboard.generate_layout_hardware(csv_fileNames[host][3], cpuModel_server, host)
 
-@app.callback(outputs_hardwareUsage, [Input('interval-component', 'n_intervals')])
-def update_graph_cpu_usage(n_intervals):
-    figures = []
-    for host_id in range(machineConfiguration.getNbMachineConfigurations()):
-        update_figures = Dashboard.update_hardware_usage(csv_fileNames[host_id][3], cpuModel_server[host_id][0])
-        for fig in update_figures:
-            figures.append(fig)
-
-    return figures
-
-
-@app.callback(outputs_apache, [Input('interval-component', 'n_intervals')])
-def update_graph_apache(n_intervals):
-    figures = []
-    for host_id in range(machineConfiguration.getNbMachineConfigurations()):
-        csv_hostname = machineConfiguration.machines_hostnames[host_id]
-        filtered_csv_list = [s for s in csv_fileNames[host_id] if s.startswith(csv_hostname)]
+        #Apache Graph
+        csv_hostname = machineConfig.machines_hostnames[host]
+        filtered_csv_list = [s for s in csv_fileNames[host] if s.startswith(csv_hostname)]
         apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
-        update_figures = Dashboard.update_apache_log(apache_csv_list, host_id)
-        for fig in update_figures:
-            figures.append(fig)
-    return figures
+        new_graphApache = Dashboard.generate_layout_apache(apache_csv_list, host)
+
+        # Append Childrens
+        children.append(new_titleHostname)
+        children.append(new_graphHardware)
+        children.append(new_graphApache)
+
+    return children
 
 
-@app.callback(outputs_uptime, [Input('interval-component', 'n_intervals')])
-def update_uptime(n_intervals):
-    childrens = []
-    for host_id in range(machineConfiguration.getNbMachineConfigurations()):
-        childrens.append(Dashboard.update_uptime(uptime_serverResults[host_id][0]))
-    return childrens
+@app.callback(
+    Output('server-overview', 'children'),
+    [
+        Input('refresh-panel-button', 'n_clicks'),
+    ],
+    State('server-overview', 'children')
+)
+def display_panelServerOverview(n_clicks, children):
+    print("ADD PANELS OVERVIEW")
+    machineConfig = Config()
+
+    children = []
+    for host in range(machineConfig.getNbMachineConfigurations()):
+        new_panel = Dashboard.generate_serverOverviewPanel(machineConfig.machines_hostnames[host], uptime_serverResults, host)
+        children.append(new_panel)
+
+    return children
 
 
 @app.callback(Output('output', 'children'),
-              [
-                  Input('submit-button', 'n_clicks'),
-                  Input('input-hostname', 'value'),
-                  Input('input-username', 'value'),
-                  Input('input-password', 'value'),
-                  Input('input-port', 'value')
-              ]
-              )
+    [
+      Input('submit-button', 'n_clicks'),
+      Input('input-hostname', 'value'),
+      Input('input-username', 'value'),
+      Input('input-password', 'value'),
+      Input('input-port', 'value')
+    ]
+)
 def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, inputPort):
+    print("SHOW INPUT")
     if n_clicks == 0:
         return ''
     else:
@@ -224,6 +233,4 @@ def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, input
         return f'Name: {inputHostname}, Username: {inputUsername}, Password: {inputPassword}, Port: {inputPort}'
 
 
-# app.run_server(debug=True)
-
-serve(app.server, host="0.0.0.0", port=8050)
+app.run_server(debug=True)

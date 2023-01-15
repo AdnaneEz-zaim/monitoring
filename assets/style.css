@@ -34,6 +34,11 @@ body {
     transition-duration: 0.5s;
 }
 
+.pageTitle {
+    margin-top: 40px;
+    text-align: center;
+}
+
 .hostname {
     margin-top: 40px;
     color: #2c3e50;
@@ -43,18 +48,15 @@ body {
     color: green;
     text-align:center;
 }
-.serverOverview {
+#server-overview {
     display: flex;
     justify-content: space-around;
 }
-.titleOverview {
-    margin-top: 40px;
-    text-align: center;
-}
+
 .serverPanel {
   border-radius: 25px;
   border: 3px solid #73AD21;
-  margin-right:10px;
+  margin-top:40px;
 }
 .serverPanel h2 {
     text-align: center;
