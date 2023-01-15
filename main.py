@@ -4,13 +4,15 @@
 import threading
 import time
 import dash
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from models.ConfigurationLoader import Config
 from models.Connexion import Connexion
 from models.MonitorThreading import MonitorTreading
 from models.ApacheServerLogInfo import LogInfo
 from models.CSVFiller import fill_csv
 import models.Dash as Dashboard
+from waitress import serve
+from dash import html
 
 # Init variables
 machineConfiguration = Config()
@@ -69,6 +71,52 @@ for h in range(machineConfiguration.getNbMachineConfigurations()):
     outputs_apache.append(Output(f'requestUrl-graph{h}', 'figure'))
     outputs_uptime.append(Output(f'uptime{h}', 'children'))
 
+
+def update_variables():
+    global machineConfiguration, nbMachineConfiguration, monitors, connexions, clients, logInfos, csv_fileNames, uptime_serverResults, cpuModel_server
+    # Init variables
+    machineConfiguration = Config()
+    nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
+    monitors = []
+    connexions = []
+    clients = []
+    logInfos = []
+    csv_fileNames = [[] for _ in range(nbMachineConfiguration)]
+    uptime_serverResults = [None] * nbMachineConfiguration
+    cpuModel_server = [None] * nbMachineConfiguration
+
+    # Init
+    for h in range(machineConfiguration.getNbMachineConfigurations()):
+        monitors.append(machineConfiguration.loadMachineConfiguration(h))
+        connexions.append(Connexion(monitors[h]))
+        clients.append(connexions[h].client)
+        logInfos.append(LogInfo())
+
+        # CREATE CSV NAMES
+        # APACHE LOG -----------------------------------------------------
+        # CSV Error code
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_statusCode404' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
+
+        # CSV Client connect
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_clientConnect' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
+
+        # CSV URL request
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_requestUrl' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
+
+        # Hardware usage ---------------------------------------
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_hardwareUsage' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
 
 def get_data():
     while True:
@@ -166,13 +214,16 @@ def update_uptime(n_intervals):
                   Input('input-password', 'value'),
                   Input('input-port', 'value')
               ]
-)
+              )
 def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, inputPort):
     if n_clicks == 0:
         return ''
     else:
         machineConfiguration.setMachineConfiguration(inputHostname, inputUsername, inputPassword, inputPort)
+        update_variables()
         return f'Name: {inputHostname}, Username: {inputUsername}, Password: {inputPassword}, Port: {inputPort}'
 
 
-app.run_server(debug=True)
+# app.run_server(debug=True)
+
+serve(app.server, host="0.0.0.0", port=8050)

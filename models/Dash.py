@@ -22,6 +22,24 @@ def generate_header_layout():
     ])
     return home_layout
 
+def generate_overview_layout():
+    machineConfiguration = Config()
+    nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
+
+    title_layout = html.Div(children=html.H1("Server overview"),
+                            className="titleOverview"
+                            )
+    serverPanel_layout = []
+    for h in range(nbMachineConfiguration):
+        hostname = machineConfiguration.machines_hostnames[h]
+        serverPanel_layout.append(generate_serverOverviewPanel(hostname, "NULL", h))
+
+    server_layout = html.Div(children=serverPanel_layout,
+                             className="serverOverview"
+                             )
+    final_layout = [title_layout, server_layout, generate_interval_component()]
+    return generate_app_layout(final_layout,'overview')
+
 
 def generate_serverOverviewPanel(hostname, uptime_serverResults, h):
     uptime_id = "uptime" + str(h)
@@ -91,7 +109,7 @@ def generate_monitoring_layout():
 
     list_layout.append(generate_interval_component())
 
-    return generate_app_layout(list_layout)
+    return generate_app_layout(list_layout, 'monitoring')
 
 def generate_configuration_layout():
 
@@ -106,7 +124,7 @@ def generate_configuration_layout():
        html.Div(html.Button('Ajouter', id='submit-button', n_clicks=0), className="buttonSubmit")
 
        ]
-    return generate_app_layout(list_layout)
+    return generate_app_layout(list_layout,'configuration')
 
 
 def generate_interval_component():
@@ -327,8 +345,8 @@ def generate_layout_apache(list_csvname, host_id):
     return html.Div(children=[])
 
 
-def generate_app_layout(list_layout):
-    return html.Div(children=list_layout)
+def generate_app_layout(list_layout, divId):
+    return html.Div(children=list_layout, id=divId)
 
 
 def update_hardware_usage(csvName, cpuModel_server):
