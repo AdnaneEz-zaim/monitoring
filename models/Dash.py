@@ -28,7 +28,7 @@ def generate_overview_layout():
     title_layout = html.Div(children=html.H2("Server overview"),
                             className="pageTitle"
                             )
-    button_layout = html.Div(html.Button('Actualiser', id='refresh-panel-button', n_clicks=0), className="buttonSubmit")
+    button_layout = html.Div(html.Button('Refresh', id='refresh-panel-button', n_clicks=0), className="buttonSubmit")
     server_layout = html.Div(children=[],
                              id="server-overview"
                              )
@@ -54,7 +54,7 @@ def generate_monitoring_layout():
     title_layout = html.Div(children=html.H2("Server monitoring"),
                             className="pageTitle"
                             )
-    button_layout = html.Div(html.Button('Actualiser', id='refresh-graph-button', n_clicks=0), className="buttonSubmit")
+    button_layout = html.Div(html.Button('Refresh', id='refresh-graph-button', n_clicks=0), className="buttonSubmit")
     monitoring_layout = html.Div(children=[],
                                  id="server-graph"
                                  )
@@ -64,18 +64,22 @@ def generate_monitoring_layout():
 
 
 def generate_configuration_layout():
-    list_layout = [
-        html.H2("Ajouter une machine", className="titleAddMachine"),
-        dcc.Input(id='input-hostname', type='text', placeholder='Entrer un hostname', className='InputForm'),
-        dcc.Input(id='input-username', type='text', placeholder='Entrer un username', className='InputForm'),
-        dcc.Input(id='input-password', type='text', placeholder='Entrer un mot de passe',
+    title_layout = html.Div(children=html.H2("Add a machine"),
+                            className="pageTitle"
+                            )
+    form_layout = html.Div(children=[
+        dcc.Input(id='input-hostname', type='text', placeholder='Enter an hostname', className='InputForm'),
+        dcc.Input(id='input-username', type='text', placeholder='Enter an username', className='InputForm'),
+        dcc.Input(id='input-password', type='text', placeholder='Enter a password',
                   className='InputForm'),
-        dcc.Input(id='input-port', type='text', placeholder='Entrer un port', className='InputForm'),
+        dcc.Input(id='input-port', type='text', placeholder='Enter a port', className='InputForm'),
         html.Div(id='output'),
-        html.Div(html.Button('Ajouter', id='submit-button', n_clicks=0), className="buttonSubmit")
-
-    ]
-    return generate_app_layout(list_layout, 'configuration')
+        html.Div(html.Button('Add', id='submit-button', n_clicks=0), className="buttonSubmit")
+        ],
+        className="Form"
+    )
+    final_layout = [title_layout, form_layout]
+    return generate_app_layout(final_layout, 'configuration')
 
 
 def generate_interval_component():

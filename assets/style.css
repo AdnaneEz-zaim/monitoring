@@ -26,7 +26,7 @@ body {
     color: white;
     text-decoration: none;
     padding:5px;
-    border-radius: 40px;
+    border-radius: 5px;
 }
 .pageLink:hover {
     background-color: white;
@@ -73,7 +73,12 @@ body {
     margin-right:2%;
 }
 
-.InputForm{
+.Form{
+    display: grid;
+    justify-content: center;
+}
+
+.InputForm {
     padding: 0.5em;
     margin: 0.5em;
     color: #3c3c3c;
@@ -81,16 +86,9 @@ body {
     border: none;
     border-radius: 3px;
     box-shadow: inset 0 0 0 1px #3c3c3c;
-    width: 60%;
-    margin-left: 20%;
+    width: 100%;
     font-size: 20px larger;
-}
-
-.contentCentre{
-    position: absolute; /* utilise la position absolue pour centrer l'élément */
-    left: 53%; /* centre horizontalement l'élément */
-    top: 35%;
-    transform: translate(-50%, -50%); /* finit de centrer l'élément */
+    text-align: center;
 }
 
 .buttonSubmit{
@@ -98,9 +96,6 @@ body {
     align-items: center; /* centre verticalement l'élément */
     justify-content: center; /* centre horizontalement l'élément */
 }
-.titleAddMachine{
-    margin-top:40px;
-    text-align: center;
-}
+
 
 
