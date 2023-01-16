@@ -1,3 +1,8 @@
+image: docker:20.10.16
+
+services:
+  - docker:20.10.16-dind
+
 variables:
   CI_REGISTRY_IMAGE: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6
 
@@ -10,15 +15,12 @@ stages:
   - lint
 
 build:
-  image: docker:20.10.16
-  services:
-    - name : docker:20.10.16-dind
-      entrypoint: ["env", "-u", "DOCKER_HOST"]
-      command: ["dockerd-entrypoint.sh"]
   stage: build
   script:
-    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
-    - docker push "$CI_REGISTRY_IMAGE"
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
 
 test_loadConfiguration:
   stage: test
