@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY requirements.txt requirements.txt
 
-COPY ..
+COPY . .
 
 RUN pip3 install --prefer-binary --no-cache --no-cache-dir -r requirements.txt \
     && addgroup --gid 1001 dashboard \ 
