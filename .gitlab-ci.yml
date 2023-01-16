@@ -5,6 +5,7 @@ services:
 
 variables:
   CI_REGISTRY_IMAGE: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6
+  CI_REGISTRY_IMAGE_TEST: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6/tests
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
@@ -23,9 +24,15 @@ build:
     - docker build --pull -t "$CI_REGISTRY_IMAGE" .
     - docker push $CI_REGISTRY_IMAGE
 
+test:
+  stage: test
+  script:
+    - docker build --pull -t $CI_REGISTRY_IMAGE_TEST .
+    - docker push $CI_REGISTRY_IMAGE_TEST
+
 test_loadConfiguration:
   stage: test
-  image: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
+  image: $CI_REGISTRY_IMAGE_TEST
   script:
     - python3 -m unittest tests/test_loadConfiguration.py
 
@@ -38,13 +45,13 @@ test_loadConfiguration:
 
 test_apacheLogParser:
   stage: test
-  image: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
+  image: $CI_REGISTRY_IMAGE_TEST
   script:
     - python -m unittest tests/test_apacheLogParser.py
 
 test_apacheLogInfo:
   stage: test
-  image: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
+  image: $CI_REGISTRY_IMAGE_TEST
   script: 
     - python -m unittest tests/test_apacheLogInfo.py
 
