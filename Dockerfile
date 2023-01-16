@@ -14,4 +14,4 @@ USER dashboard
 
 EXPOSE 8050
 
-ENTRYPOINT python3 main.
+ENTRYPOINT python3 main.py
