@@ -25,8 +25,9 @@ build:
 
 test_loadConfiguration:
   stage: test
+  image: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
   script:
-    - python -m unittest tests/test_loadConfiguration.py
+    - python3 -m unittest tests/test_loadConfiguration.py
 
 #test_connexion:
 #  stage: test
@@ -37,11 +38,13 @@ test_loadConfiguration:
 
 test_apacheLogParser:
   stage: test
+  image: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
   script:
     - python -m unittest tests/test_apacheLogParser.py
 
 test_apacheLogInfo:
   stage: test
+  image: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
   script: 
     - python -m unittest tests/test_apacheLogInfo.py
 
