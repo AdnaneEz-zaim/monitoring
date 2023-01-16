@@ -9,7 +9,6 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
 
-
 before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
@@ -27,7 +26,7 @@ build:
 test_loadConfiguration:
   stage: test
   script:
-    - python3 -m unittest tests/test_loadConfiguration.py
+    - python -m unittest tests/test_loadConfiguration.py
 
 #test_connexion:
 #  stage: test
@@ -39,12 +38,12 @@ test_loadConfiguration:
 test_apacheLogParser:
   stage: test
   script:
-    - python3 -m unittest tests/test_apacheLogParser.py
+    - python -m unittest tests/test_apacheLogParser.py
 
 test_apacheLogInfo:
   stage: test
   script: 
-    - python3 -m unittest tests/test_apacheLogInfo.py
+    - python -m unittest tests/test_apacheLogInfo.py
 
 #linter:
 #  stage: lint
