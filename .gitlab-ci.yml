@@ -4,7 +4,7 @@ services:
   - docker:20.10.16-dind
 
 variables:
-  CI_REGISTRY_IMAGE: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6/Dockerfile
+  CI_REGISTRY_IMAGE: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
