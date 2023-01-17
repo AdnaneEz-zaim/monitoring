@@ -9,6 +9,7 @@ def appendDataLine(data):
         res.append(line)
     return res
 
+
 class MonitorTreading(threading.Thread):
     def __init__(self, client, id, logInfo):
         threading.Thread.__init__(self)
@@ -59,8 +60,8 @@ class MonitorTreading(threading.Thread):
         self.apache_clientConnect_result = self.logInfo.get_time_remote_client_access()
         self.apache_requestUrl_result = self.logInfo.get_request_url()
 
-
     def workon_hardwareUsage(self):
+        """ get hardware usage info"""
         date = datetime.now()
 
         # Memory Usage
@@ -78,11 +79,13 @@ class MonitorTreading(threading.Thread):
         self.hardwareUsage_result = [date, cpu_used, mem_used, sto_used]
 
     def workon_uptime(self):
+        """ get uptime of the server """
         uptime = appendDataLine(self.get_data("uptime | awk -F'( |,|:)+' '{print $6,$7}'"))
 
         # Join data
         self.uptime_result = uptime
 
     def workon_CPU_name(self):
+        """ get model name from cpu """
         cpu_name = appendDataLine(self.get_data("grep \"model name\" /proc/cpuinfo | head -1 | cut -d \" \" -f 3-"))
         self.CPU_name_result = cpu_name
