@@ -11,8 +11,6 @@ from models.MonitorThreading import MonitorTreading
 from models.ApacheServerLogInfo import LogInfo
 from models.CSVFiller import fill_csv
 import models.Dash as Dashboard
-from waitress import serve
-from dash import html
 
 # Init variables
 machineConfiguration = Config()
@@ -62,8 +60,14 @@ for h in range(machineConfiguration.getNbMachineConfigurations()):
                    + '.csv'
     csv_fileNames[h].append(csv_filename)
 
+
 def update_variables():
-    global machineConfiguration, nbMachineConfiguration, monitors, connexions, clients, logInfos, csv_fileNames, uptime_serverResults, cpuModel_server
+    """
+    Update variables when new configuratio is added to config.ini
+    """
+    global machineConfiguration, nbMachineConfiguration, \
+        monitors, connexions, clients, logInfos, csv_fileNames, \
+        uptime_serverResults, cpuModel_server
     # Init variables
     machineConfiguration = Config()
     nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
@@ -108,7 +112,9 @@ def update_variables():
                        + '.csv'
         csv_fileNames[h].append(csv_filename)
 
+
 def get_data():
+    """ gather data from data scrapper threads"""
     while True:
         # Starting one thread for each client
         MonitorThreads = []
@@ -163,25 +169,27 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets, use_pages=T
 app.title = "GROUP 6 Server Monitoring Dashboard"
 app.layout = Dashboard.generate_header_layout()
 
+
 @app.callback(
     Output('server-graph', 'children'),
     [
-        Input('refresh-graph-button', 'n_clicks'),
-        Input('interval-component', 'n_intervals')
+        Input('refresh-graph-button'),
+        Input('interval-component')
     ],
-    State('server-graph', 'children')
+    State('server-graph')
 )
-def display_graphServerMonitoring(n_clicks, n_intervals, children):
+def display_graphServerMonitoring():
     print("ADD GRAPH MONITORING")
     machineConfig = Config()
     children = []
     for host in range(machineConfig.getNbMachineConfigurations()):
         # Title
-        new_titleHostname = Dashboard.generate_hostname_title(machineConfig.machines_hostnames[host], uptime_serverResults, host)
+        new_titleHostname = Dashboard.generate_hostname_title(machineConfig.machines_hostnames[host],
+                                                              uptime_serverResults, host)
         # Hardware graph
         new_graphHardware = Dashboard.generate_layout_hardware(csv_fileNames[host][3], cpuModel_server, host)
 
-        #Apache Graph
+        # Apache Graph
         csv_hostname = machineConfig.machines_hostnames[host]
         filtered_csv_list = [s for s in csv_fileNames[host] if s.startswith(csv_hostname)]
         apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
@@ -198,31 +206,32 @@ def display_graphServerMonitoring(n_clicks, n_intervals, children):
 @app.callback(
     Output('server-overview', 'children'),
     [
-        Input('refresh-panel-button', 'n_clicks'),
+        Input('refresh-panel-button'),
     ],
-    State('server-overview', 'children')
+    State('server-overview')
 )
-def display_panelServerOverview(n_clicks, children):
+def display_panelServerOverview():
     print("ADD PANELS OVERVIEW")
     machineConfig = Config()
 
     children = []
     for host in range(machineConfig.getNbMachineConfigurations()):
-        new_panel = Dashboard.generate_serverOverviewPanel(machineConfig.machines_hostnames[host], uptime_serverResults, host)
+        new_panel = Dashboard.generate_serverOverviewPanel(machineConfig.machines_hostnames[host], uptime_serverResults,
+                                                           host)
         children.append(new_panel)
 
     return children
 
 
 @app.callback(Output('output', 'children'),
-    [
-      Input('submit-button', 'n_clicks'),
-      Input('input-hostname', 'value'),
-      Input('input-username', 'value'),
-      Input('input-password', 'value'),
-      Input('input-port', 'value')
-    ]
-)
+              [
+                  Input('submit-button', 'n_clicks'),
+                  Input('input-hostname', 'value'),
+                  Input('input-username', 'value'),
+                  Input('input-password', 'value'),
+                  Input('input-port', 'value')
+              ]
+              )
 def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, inputPort):
     print("SHOW INPUT")
     if n_clicks == 0:
