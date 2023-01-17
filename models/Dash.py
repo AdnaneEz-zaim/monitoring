@@ -1,6 +1,5 @@
 import dash
-from models.ConfigurationLoader import Config
-from dash import Dash, html, dcc
+from dash import html, dcc
 import pandas as pd
 
 
@@ -70,7 +69,7 @@ def generate_configuration_layout():
     form_layout = html.Div(children=[
         dcc.Input(id='input-hostname', type='text', placeholder='Enter an hostname', className='InputForm'),
         dcc.Input(id='input-username', type='text', placeholder='Enter an username', className='InputForm'),
-        dcc.Input(id='input-password', type='text', placeholder='Enter a password',
+        dcc.Input(id='input-password', type='password', placeholder='Enter a password',
                   className='InputForm'),
         dcc.Input(id='input-port', type='text', placeholder='Enter a port', className='InputForm'),
         html.Div(id='output'),
