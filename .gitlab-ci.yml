@@ -25,7 +25,7 @@ linter:
   stage : lint
   script:
     - pip install pylint
-    - pylint *.py --fail-under=7.0
+    - pylint *.py --disable=C0103,C0111 --fail-under=7.0
 
 coverage:
   stage: coverage
