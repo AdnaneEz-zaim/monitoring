@@ -253,6 +253,4 @@ def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, input
     update_variables()
     return html.Div('''New configuration will be visible in few seconds ...''')
 
-
-if __name__ == 'main':
-    app.run(debug=False, host='0.0.0.0', port=8050)
+app.run(debug=False, host='0.0.0.0', port=8050)
