@@ -82,6 +82,7 @@ def update_variables():
 
     # Init
     for host in range(machineConfiguration.getNbMachineConfigurations()):
+        print(host)
         monitors.append(machineConfiguration.loadMachineConfiguration(host))
         connexions.append(Connexion(monitors[host]))
         clients.append(connexions[host].client)
@@ -90,28 +91,28 @@ def update_variables():
         # CREATE CSV NAMES
         # APACHE LOG -----------------------------------------------------
         # CSV Error code
-        csv_filename = machineConfiguration.machines_hostnames[h] \
+        csv_filename = machineConfiguration.machines_hostnames[host] \
                        + '_apacheLog_statusCode404' \
                        + '.csv'
-        csv_fileNames[h].append(csv_filename)
+        csv_fileNames[host].append(csv_filename)
 
         # CSV Client connect
-        csv_filename = machineConfiguration.machines_hostnames[h] \
+        csv_filename = machineConfiguration.machines_hostnames[host] \
                        + '_apacheLog_clientConnect' \
                        + '.csv'
-        csv_fileNames[h].append(csv_filename)
+        csv_fileNames[host].append(csv_filename)
 
         # CSV URL request
-        csv_filename = machineConfiguration.machines_hostnames[h] \
+        csv_filename = machineConfiguration.machines_hostnames[host] \
                        + '_apacheLog_requestUrl' \
                        + '.csv'
-        csv_fileNames[h].append(csv_filename)
+        csv_fileNames[host].append(csv_filename)
 
         # Hardware usage ---------------------------------------
-        csv_filename = machineConfiguration.machines_hostnames[h] \
+        csv_filename = machineConfiguration.machines_hostnames[host] \
                        + '_hardwareUsage' \
                        + '.csv'
-        csv_fileNames[h].append(csv_filename)
+        csv_fileNames[host].append(csv_filename)
 
 
 def get_data():
@@ -252,5 +253,6 @@ def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, input
         inputPort)
     update_variables()
     return html.Div('''New configuration will be visible in few seconds ...''')
+
 
 app.run(debug=False, host='0.0.0.0', port=8050)
