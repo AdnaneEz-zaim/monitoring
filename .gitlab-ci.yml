@@ -25,7 +25,7 @@ linter:
   stage : lint
   script:
     - pip install pycodestyle
-    - pycodestyle .
+    - pycodestyle
 
 deployment:
   stage: deploy
