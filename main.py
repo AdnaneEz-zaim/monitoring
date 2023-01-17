@@ -244,17 +244,17 @@ def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, input
     print("SHOW INPUT")
     if n_clicks == 0:
         return ''
-    else:
-        machineConfiguration.setMachineConfiguration(
-            inputHostname,
-            inputUsername,
-            inputPassword,
-            inputPort)
-        update_variables()
-        return f'Name: {inputHostname}, ' \
-               f'Username: {inputUsername}, ' \
-               f'Password: {inputPassword}, ' \
-               f'Port: {inputPort}'
+
+    machineConfiguration.setMachineConfiguration(
+        inputHostname,
+        inputUsername,
+        inputPassword,
+        inputPort)
+    update_variables()
+    return f'Name: {inputHostname}, ' \
+           f'Username: {inputUsername}, ' \
+           f'Password: {inputPassword}, ' \
+           f'Port: {inputPort}'
 
 
 app.run_server(debug=True)
