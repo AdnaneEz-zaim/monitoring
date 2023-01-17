@@ -24,8 +24,8 @@ test_apacheLogInfo:
 linter:
   stage : lint
   script:
-    - pip install pycodestyle
-    - pycodestyle
+    - pip install pylint
+    - pylint
 
 deployment:
   stage: deploy
