@@ -1,0 +1,6 @@
+.gitignore
+.vscode
+*.csv
+__pycache__
+.pytest_cache
+README.md

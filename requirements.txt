@@ -1,0 +1,7 @@
+virtualenv
+apache-log-parser
+configParser
+paramiko
+plotly
+pandas
+dash

@@ -22,8 +22,10 @@ class Test(unittest.TestCase):
         self.data_server_info.set_list_data(self.result)
     def test_get_time_status_code(self):
         """Method testing the method for time status code"""
-        self.assertEqual(len(self.data_server_info.get_time_status_code(404)),2)
+        count_error = sum(1 for i in self.data_server_info.get_time_status_code(404) if i[1] == 1)
+        self.assertEqual(count_error, 2)
     def test_get_time_remote_client_access(self):
         """Method testing the method for the time remote client access"""
-        self.assertEqual(len(self.data_server_info.get_time_remote_client_access()),4)
+        count_connection = sum(1 for i in self.data_server_info.get_time_remote_client_access() if i[1] == 1)
+        self.assertEqual(count_connection, 5)
         
