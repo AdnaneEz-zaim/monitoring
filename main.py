@@ -4,15 +4,17 @@
 import threading
 import time
 import dash
-from dash.dependencies import Input, Output
-
+from dash.dependencies import Input, Output, State
 from models.ConfigurationLoader import Config
 from models.Connexion import Connexion
 from models.MonitorThreading import MonitorTreading
 from models.ApacheServerLogInfo import LogInfo
 from models.CSVFiller import fill_csv
 import models.Dash as Dashboard
+from waitress import serve
+from dash import html
 
+# Init variables
 machineConfiguration = Config()
 nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
 monitors = []
@@ -22,13 +24,13 @@ logInfos = []
 csv_fileNames = [[] for _ in range(nbMachineConfiguration)]
 uptime_serverResults = [None] * nbMachineConfiguration
 cpuModel_server = [None] * nbMachineConfiguration
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = "GROUP 6 Server Monitoring Dashboard"
+outputs_hardwareUsage = []
+outputs_apache = []
+outputs_uptime = []
 
 # Init
-for h in range(nbMachineConfiguration):
+for h in range(machineConfiguration.getNbMachineConfigurations()):
     monitors.append(machineConfiguration.loadMachineConfiguration(h))
     connexions.append(Connexion(monitors[h]))
     clients.append(connexions[h].client)
@@ -60,43 +62,57 @@ for h in range(nbMachineConfiguration):
                    + '.csv'
     csv_fileNames[h].append(csv_filename)
 
+def update_variables():
+    global machineConfiguration, nbMachineConfiguration, monitors, connexions, clients, logInfos, csv_fileNames, uptime_serverResults, cpuModel_server
+    # Init variables
+    machineConfiguration = Config()
+    nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
+    monitors = []
+    connexions = []
+    clients = []
+    logInfos = []
+    csv_fileNames = [[] for _ in range(nbMachineConfiguration)]
+    uptime_serverResults = [None] * nbMachineConfiguration
+    cpuModel_server = [None] * nbMachineConfiguration
 
-def createAppLayout(list_csv):
-    list_layout = [Dashboard.generate_header_layout()]
+    # Init
+    for h in range(machineConfiguration.getNbMachineConfigurations()):
+        monitors.append(machineConfiguration.loadMachineConfiguration(h))
+        connexions.append(Connexion(monitors[h]))
+        clients.append(connexions[h].client)
+        logInfos.append(LogInfo())
 
-    # For every monitored machines
-    for host_id in range(nbMachineConfiguration):
-        # Get all csv file name that start with the currrent machine hostname
-        csv_hostname = machineConfiguration.machines_hostnames[host_id]
+        # CREATE CSV NAMES
+        # APACHE LOG -----------------------------------------------------
+        # CSV Error code
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_statusCode404' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
 
-        # Get csv of current hostname
-        filtered_csv_list = [s for s in list_csv[host_id] if s.startswith(csv_hostname)]
-        # Get hardware csv of current hostname
-        hardware_csv_list = [csvName for csvName in filtered_csv_list if "hardware" in csvName]
-        # Get apache csv of current hostname
-        apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
+        # CSV Client connect
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_clientConnect' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
 
-        # Generate hostname title layout
-        list_layout.append(Dashboard.generate_hostname_title(csv_hostname, "NULL", host_id))
+        # CSV URL request
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_apacheLog_requestUrl' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
 
-        # Generate layout for hardware usage
-        list_layout.append(Dashboard.generate_layout_hardware(hardware_csv_list, "NULL", host_id))
-
-        # Generate layout for apache log
-        list_layout.append(Dashboard.generate_layout_apache(apache_csv_list, host_id))
-
-    list_layout.append(Dashboard.generate_interval_component())
-
-    app.layout = Dashboard.generate_app_layout(list_layout)
-
-    print("DASH LAYOUT CREATED")
-
+        # Hardware usage ---------------------------------------
+        csv_filename = machineConfiguration.machines_hostnames[h] \
+                       + '_hardwareUsage' \
+                       + '.csv'
+        csv_fileNames[h].append(csv_filename)
 
 def get_data():
     while True:
         # Starting one thread for each client
         MonitorThreads = []
-        for h in range(nbMachineConfiguration):
+        for h in range(machineConfiguration.getNbMachineConfigurations()):
             t = MonitorTreading(clients[h], h, logInfos[h])
             t.start()
             MonitorThreads.append(t)
@@ -125,9 +141,8 @@ def get_data():
 
         print("-[BACKEND]-DATA SCRAPPING DONE")
 
-
         # CSV Filling
-        for host_id in range(nbMachineConfiguration):
+        for host_id in range(machineConfiguration.getNbMachineConfigurations()):
             fill_csv(csv_fileNames[host_id][0], apache_statusCode_results, host_id)
             fill_csv(csv_fileNames[host_id][1], apache_clientConnect_results, host_id)
             fill_csv(csv_fileNames[host_id][2], apache_requestUrl_results, host_id)
@@ -138,61 +153,84 @@ def get_data():
         time.sleep(5)
 
 
-outputs_hardwareUsage = []
-for i in range(nbMachineConfiguration):
-    outputs_hardwareUsage.append(Output(f'cpu-usage-graph{i}', 'figure'))
-    outputs_hardwareUsage.append(Output(f'mem-usage-graph{i}', 'figure'))
-    outputs_hardwareUsage.append(Output(f'sto-usage-graph{i}', 'figure'))
-
-
-@app.callback(outputs_hardwareUsage, [Input('interval-component', 'n_intervals')])
-def update_graph_cpu_usage(n_intervals):
-    figures = []
-    for host_id in range(nbMachineConfiguration):
-        update_figures = Dashboard.update_hardware_usage(csv_fileNames[host_id][3], cpuModel_server[host_id][0])
-        for fig in update_figures:
-            figures.append(fig)
-
-    return figures
-
-
-outputs_apache = []
-for i in range(nbMachineConfiguration):
-    outputs_apache.append(Output(f'error-code-graph{i}', 'figure'))
-    outputs_apache.append(Output(f'client-connect-graph{i}', 'figure'))
-    outputs_apache.append(Output(f'requestUrl-graph{i}', 'figure'))
-
-
-@app.callback(outputs_apache, [Input('interval-component', 'n_intervals')])
-def update_graph_apache(n_intervals):
-    figures = []
-    for host_id in range(nbMachineConfiguration):
-        csv_hostname = machineConfiguration.machines_hostnames[host_id]
-        filtered_csv_list = [s for s in csv_fileNames[host_id] if s.startswith(csv_hostname)]
-        apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
-        update_figures = Dashboard.update_apache_log(apache_csv_list, host_id)
-        for fig in update_figures:
-            figures.append(fig)
-    return figures
-
-
-outputs_uptime = []
-for i in range(nbMachineConfiguration):
-    outputs_uptime.append(Output(f'uptime{i}', 'children'))
-
-
-@app.callback(outputs_uptime, [Input('interval-component', 'n_intervals')])
-def update_uptime(n_intervals):
-    childrens = []
-    for host_id in range(nbMachineConfiguration):
-        childrens.append(Dashboard.update_uptime(uptime_serverResults[host_id][0]))
-    return childrens
-
-
 # Init the data scrapper thread
 dataScrapperThread = threading.Thread(target=get_data)
 # Start the data scrapper thread
 dataScrapperThread.start()
 
-createAppLayout(csv_fileNames)
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True, suppress_callback_exceptions=True)
+app.title = "GROUP 6 Server Monitoring Dashboard"
+app.layout = Dashboard.generate_header_layout()
+
+@app.callback(
+    Output('server-graph', 'children'),
+    [
+        Input('refresh-graph-button', 'n_clicks'),
+        Input('interval-component', 'n_intervals')
+    ],
+    State('server-graph', 'children')
+)
+def display_graphServerMonitoring(n_clicks, n_intervals, children):
+    print("ADD GRAPH MONITORING")
+    machineConfig = Config()
+    children = []
+    for host in range(machineConfig.getNbMachineConfigurations()):
+        # Title
+        new_titleHostname = Dashboard.generate_hostname_title(machineConfig.machines_hostnames[host], uptime_serverResults, host)
+        # Hardware graph
+        new_graphHardware = Dashboard.generate_layout_hardware(csv_fileNames[host][3], cpuModel_server, host)
+
+        #Apache Graph
+        csv_hostname = machineConfig.machines_hostnames[host]
+        filtered_csv_list = [s for s in csv_fileNames[host] if s.startswith(csv_hostname)]
+        apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
+        new_graphApache = Dashboard.generate_layout_apache(apache_csv_list, host)
+
+        # Append Childrens
+        children.append(new_titleHostname)
+        children.append(new_graphHardware)
+        children.append(new_graphApache)
+
+    return children
+
+
+@app.callback(
+    Output('server-overview', 'children'),
+    [
+        Input('refresh-panel-button', 'n_clicks'),
+    ],
+    State('server-overview', 'children')
+)
+def display_panelServerOverview(n_clicks, children):
+    print("ADD PANELS OVERVIEW")
+    machineConfig = Config()
+
+    children = []
+    for host in range(machineConfig.getNbMachineConfigurations()):
+        new_panel = Dashboard.generate_serverOverviewPanel(machineConfig.machines_hostnames[host], uptime_serverResults, host)
+        children.append(new_panel)
+
+    return children
+
+
+@app.callback(Output('output', 'children'),
+    [
+      Input('submit-button', 'n_clicks'),
+      Input('input-hostname', 'value'),
+      Input('input-username', 'value'),
+      Input('input-password', 'value'),
+      Input('input-port', 'value')
+    ]
+)
+def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, inputPort):
+    print("SHOW INPUT")
+    if n_clicks == 0:
+        return ''
+    else:
+        machineConfiguration.setMachineConfiguration(inputHostname, inputUsername, inputPassword, inputPort)
+        update_variables()
+        return f'Name: {inputHostname}, Username: {inputUsername}, Password: {inputPassword}, Port: {inputPort}'
+
+
 app.run_server(debug=True)
