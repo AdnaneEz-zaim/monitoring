@@ -165,7 +165,8 @@ dataScrapperThread = threading.Thread(target=get_data)
 dataScrapperThread.start()
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets, use_pages=True, suppress_callback_exceptions=True)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
+                use_pages=True, suppress_callback_exceptions=True)
 app.title = "GROUP 6 Server Monitoring Dashboard"
 app.layout = Dashboard.generate_header_layout()
 
@@ -184,10 +185,15 @@ def display_graphServerMonitoring():
     children = []
     for host in range(machineConfig.getNbMachineConfigurations()):
         # Title
-        new_titleHostname = Dashboard.generate_hostname_title(machineConfig.machines_hostnames[host],
-                                                              uptime_serverResults, host)
+        new_titleHostname = Dashboard.generate_hostname_title(
+            machineConfig.machines_hostnames[host],
+            uptime_serverResults,
+            host)
         # Hardware graph
-        new_graphHardware = Dashboard.generate_layout_hardware(csv_fileNames[host][3], cpuModel_server, host)
+        new_graphHardware = Dashboard.generate_layout_hardware(
+            csv_fileNames[host][3],
+            cpuModel_server,
+            host)
 
         # Apache Graph
         csv_hostname = machineConfig.machines_hostnames[host]
@@ -216,8 +222,10 @@ def display_panelServerOverview():
 
     children = []
     for host in range(machineConfig.getNbMachineConfigurations()):
-        new_panel = Dashboard.generate_serverOverviewPanel(machineConfig.machines_hostnames[host], uptime_serverResults,
-                                                           host)
+        new_panel = Dashboard.generate_serverOverviewPanel(
+            machineConfig.machines_hostnames[host],
+            uptime_serverResults,
+            host)
         children.append(new_panel)
 
     return children
@@ -237,9 +245,16 @@ def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, input
     if n_clicks == 0:
         return ''
     else:
-        machineConfiguration.setMachineConfiguration(inputHostname, inputUsername, inputPassword, inputPort)
+        machineConfiguration.setMachineConfiguration(
+            inputHostname,
+            inputUsername,
+            inputPassword,
+            inputPort)
         update_variables()
-        return f'Name: {inputHostname}, Username: {inputUsername}, Password: {inputPassword}, Port: {inputPort}'
+        return f'Name: {inputHostname}, ' \
+               f'Username: {inputUsername}, ' \
+               f'Password: {inputPassword}, ' \
+               f'Port: {inputPort}'
 
 
 app.run_server(debug=True)
