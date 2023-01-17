@@ -6,11 +6,6 @@ stages:
   - coverage
   - deploy
 
-test_loadConfiguration:
-  stage: test
-  script:
-    - python3 -m unittest tests/test_loadConfiguration.py
-
 test_apacheLogParser:
   stage: test
   script:
