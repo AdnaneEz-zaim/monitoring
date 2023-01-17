@@ -22,9 +22,10 @@ test_apacheLogInfo:
     - python -m unittest tests/test_apacheLogInfo.py
 
 linter:
+  stage : lint
   script:
     - pip install pycodestyle
-    - pycodestyle $PROJECT_ROOT
+    - pycodestyle .
 
 deployment:
   stage: deploy
