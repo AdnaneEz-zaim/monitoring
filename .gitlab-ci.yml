@@ -24,7 +24,7 @@ test_apacheLogInfo:
 linter:
   script:
     - pip install pycodestyle
-    - pycodestyle
+    - pycodestyle $PROJECT_ROOT
 
 deployment:
   stage: deploy
