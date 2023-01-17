@@ -23,6 +23,21 @@ class Config:
     def readMachineConfiguration(self):
         # Loading configuration file ----------------------------------------
         config = configparser.ConfigParser()
+        if os.path.exists(self.path_config_file):
+            # Create configuration file
+            print("NO CONFIGURATION FILE FOUND, CREATE ONE")
+
+            # Set the new values of the parameters
+            config.set('monitored_machines', 'hostnames', "")
+            config.set('monitored_machines', 'usernames', "")
+            config.set('monitored_machines', 'passwords', "")
+            config.set('monitored_machines', 'ports', "")
+
+            # Write the new values to the config file
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
+        # Read
         config.read(self.path_config_file)
 
         # Set attributes
