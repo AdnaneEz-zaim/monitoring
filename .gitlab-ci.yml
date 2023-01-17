@@ -22,11 +22,11 @@ test_apacheLogInfo:
     - python -m unittest tests/test_apacheLogInfo.py
 
 linter:
-  stage: lint
-  before_script:
-    - pip install pylint
   script:
-    - pylint
+    - pip install pylint
+    - pylint $PROJECT_ROOT
+  tags:
+    - python
 
 deployment:
   stage: deploy
