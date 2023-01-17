@@ -1,5 +1,4 @@
 """Class to parse the log files we use"""
-from pprint import pprint
 import apache_log_parser
 
 
