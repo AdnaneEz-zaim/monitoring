@@ -11,6 +11,7 @@ from models.MonitorThreading import MonitorTreading
 from models.ApacheServerLogInfo import LogInfo
 from models.CSVFiller import fill_csv
 import models.Dash as Dashboard
+from dash import html
 
 # Init variables
 machineConfiguration = Config()
@@ -18,7 +19,7 @@ nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
 monitors = []
 connexions = []
 clients = []
-logInfos = []
+logInfo = []
 csv_fileNames = [[] for _ in range(nbMachineConfiguration)]
 uptime_serverResults = [None] * nbMachineConfiguration
 cpuModel_server = [None] * nbMachineConfiguration
@@ -32,7 +33,7 @@ for h in range(machineConfiguration.getNbMachineConfigurations()):
     monitors.append(machineConfiguration.loadMachineConfiguration(h))
     connexions.append(Connexion(monitors[h]))
     clients.append(connexions[h].client)
-    logInfos.append(LogInfo())
+    logInfo.append(LogInfo())
 
     # CREATE CSV NAMES
     # APACHE LOG -----------------------------------------------------
@@ -63,28 +64,28 @@ for h in range(machineConfiguration.getNbMachineConfigurations()):
 
 def update_variables():
     """
-    Update variables when new configuratio is added to config.ini
+    Update variables when new configuration is added to config.ini
     """
     global machineConfiguration, nbMachineConfiguration, \
-        monitors, connexions, clients, logInfos, csv_fileNames, \
-        uptime_serverResults, cpuModel_server
+        monitors, connexions, clients, logInfo, csv_fileNames, \
+        uptime_serverResults, cpuModel_server, csv_filename
     # Init variables
     machineConfiguration = Config()
     nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
     monitors = []
     connexions = []
     clients = []
-    logInfos = []
+    logInfo = []
     csv_fileNames = [[] for _ in range(nbMachineConfiguration)]
     uptime_serverResults = [None] * nbMachineConfiguration
     cpuModel_server = [None] * nbMachineConfiguration
 
     # Init
-    for h in range(machineConfiguration.getNbMachineConfigurations()):
-        monitors.append(machineConfiguration.loadMachineConfiguration(h))
-        connexions.append(Connexion(monitors[h]))
-        clients.append(connexions[h].client)
-        logInfos.append(LogInfo())
+    for host in range(machineConfiguration.getNbMachineConfigurations()):
+        monitors.append(machineConfiguration.loadMachineConfiguration(host))
+        connexions.append(Connexion(monitors[host]))
+        clients.append(connexions[host].client)
+        logInfo.append(LogInfo())
 
         # CREATE CSV NAMES
         # APACHE LOG -----------------------------------------------------
@@ -118,8 +119,8 @@ def get_data():
     while True:
         # Starting one thread for each client
         MonitorThreads = []
-        for h in range(machineConfiguration.getNbMachineConfigurations()):
-            t = MonitorTreading(clients[h], h, logInfos[h])
+        for host in range(machineConfiguration.getNbMachineConfigurations()):
+            t = MonitorTreading(clients[host], host, logInfo[host])
             t.start()
             MonitorThreads.append(t)
 
@@ -174,12 +175,12 @@ app.layout = Dashboard.generate_header_layout()
 @app.callback(
     Output('server-graph', 'children'),
     [
-        Input('refresh-graph-button'),
-        Input('interval-component')
+        Input('refresh-graph-button', 'n_clicks'),
+        Input('interval-component', 'n_intervals')
     ],
-    State('server-graph')
+    State('server-graph', 'children')
 )
-def display_graphServerMonitoring():
+def display_graphServerMonitoring(n_clicks, n_intervals, children):
     print("ADD GRAPH MONITORING")
     machineConfig = Config()
     children = []
@@ -212,11 +213,11 @@ def display_graphServerMonitoring():
 @app.callback(
     Output('server-overview', 'children'),
     [
-        Input('refresh-panel-button'),
+        Input('refresh-panel-button', 'n_clicks'),
     ],
-    State('server-overview')
+    State('server-overview', 'children')
 )
-def display_panelServerOverview():
+def display_panelServerOverview(n_clicks, n_intervals):
     print("ADD PANELS OVERVIEW")
     machineConfig = Config()
 
@@ -250,10 +251,7 @@ def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, input
         inputPassword,
         inputPort)
     update_variables()
-    return f'Name: {inputHostname}, ' \
-           f'Username: {inputUsername}, ' \
-           f'Password: {inputPassword}, ' \
-           f'Port: {inputPort}'
+    return html.Div('''New configuration will be visible in few seconds ...''')
 
 
 app.run_server(debug=True)
