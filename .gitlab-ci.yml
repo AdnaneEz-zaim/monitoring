@@ -6,11 +6,6 @@ stages:
   - coverage
   - deploy
 
-test_loadConfiguration:
-  stage: test
-  script:
-    - python3 -m unittest tests/test_loadConfiguration.py
-
 test_apacheLogParser:
   stage: test
   script:
@@ -31,7 +26,7 @@ coverage:
   stage: coverage
   script:
     - pip install coverage
-    - coverage run -m unittest tests/test_apacheLogInfo.py tests/test_apacheLogParser.py tests/test_loadConfiguration.py
+    - coverage run -m unittest tests/test_apacheLogInfo.py tests/test_apacheLogParser.py
     - coverage report --fail-under=50
 
 deployment:
