@@ -8,19 +8,16 @@ stages:
 
 test_loadConfiguration:
   stage: test
-  image: $CI_REGISTRY_IMAGE_TEST
   script:
     - python3 -m unittest tests/test_loadConfiguration.py
 
 test_apacheLogParser:
   stage: test
-  image: $CI_REGISTRY_IMAGE_TEST
   script:
     - python -m unittest tests/test_apacheLogParser.py
 
 test_apacheLogInfo:
   stage: test
-  image: $CI_REGISTRY_IMAGE_TEST
   script: 
     - python -m unittest tests/test_apacheLogInfo.py
 
