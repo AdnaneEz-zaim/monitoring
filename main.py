@@ -241,7 +241,6 @@ def display_panelServerOverview():
               ]
               )
 def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, inputPort):
-    print("SHOW INPUT")
     if n_clicks == 0:
         return ''
 
