@@ -25,7 +25,7 @@ linter:
   stage : lint
   script:
     - pip install pylint
-    - pylint
+    - pylint *.py --fail-under=5.0
 
 deployment:
   stage: deploy
