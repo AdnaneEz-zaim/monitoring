@@ -31,7 +31,7 @@ coverage:
   stage: coverage
   script:
     - pip install coverage
-    - coverage run -m unittest
+    - coverage run -m unittest tests/*.py
     - coverage report --fail-under=50
 
 deployment:
