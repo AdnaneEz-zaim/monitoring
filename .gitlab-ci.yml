@@ -4,8 +4,8 @@ services:
   - docker:20.10.16-dind
 
 variables:
-  CI_REGISTRY_IMAGE: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6
-  CI_REGISTRY_IMAGE_TEST: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6/tests
+  CI_REGISTRY_IMAGE: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:latest
+  CI_REGISTRY_IMAGE_TEST: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
@@ -14,22 +14,9 @@ before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
 stages:
-  - build
-  - build-test
   - test
+  - build
   - lint
-
-build:
-  stage: build
-  script:
-    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
-    - docker push $CI_REGISTRY_IMAGE
-
-build-test:
-  stage: build-test
-  script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE_TEST .
-    - docker push $CI_REGISTRY_IMAGE_TEST
 
 test_loadConfiguration:
   stage: test
@@ -55,6 +42,13 @@ test_apacheLogInfo:
   image: $CI_REGISTRY_IMAGE_TEST
   script: 
     - python -m unittest tests/test_apacheLogInfo.py
+
+build:
+  stage: build
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
+    - docker push $CI_REGISTRY_IMAGE
+
 
 #linter:
 #  stage: lint
