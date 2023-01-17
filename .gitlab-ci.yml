@@ -23,10 +23,8 @@ test_apacheLogInfo:
 
 linter:
   script:
-    - pip install pylint
-    - pylint $PROJECT_ROOT
-  tags:
-    - python
+    - pip install pycodestyle
+    - pycodestyle
 
 deployment:
   stage: deploy
