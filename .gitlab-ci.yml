@@ -1,35 +1,16 @@
-image: docker:20.10.16
-
-services:
-  - docker:20.10.16-dind
-
-variables:
-  CI_REGISTRY_IMAGE: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:latest
-  CI_REGISTRY_IMAGE_TEST: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
-  DOCKER_HOST: tcp://docker:2375/
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
-
-before_script:
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+image: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:python-docker-test
 
 stages:
   - test
-  - build
   - lint
+  - coverage
+  - deploy
 
 test_loadConfiguration:
   stage: test
   image: $CI_REGISTRY_IMAGE_TEST
   script:
     - python3 -m unittest tests/test_loadConfiguration.py
-
-#test_connexion:
-#  stage: test
-#  before_script:
-#    - pip install paramiko
-#  script:
-#    - python3 -m unittest tests/test_connexion.py
 
 test_apacheLogParser:
   stage: test
@@ -43,19 +24,38 @@ test_apacheLogInfo:
   script: 
     - python -m unittest tests/test_apacheLogInfo.py
 
-build:
-  stage: build
+linter:
+  stage: lint
+  before_script:
+    - pip install pylint
+  script:
+    - pylint
+
+deployment:
+  stage: deploy
+  image: docker:cli
+
+  variables:
+    CI_REGISTRY_IMAGE: devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6:latest
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  services:
+    - name: docker:dind
+      entrypoint: ["env", "-u", "DOCKER_HOST"]
+      command: ["dockerd-entrypoint.sh"]
+
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE" .
     - docker push $CI_REGISTRY_IMAGE
 
+  only: 
+    - main
 
-#linter:
-#  stage: lint
-#  before_script:
-#    - pip install pylint
-#  script:
-#    - pylint $PROJECT_ROOT
 
 
 
