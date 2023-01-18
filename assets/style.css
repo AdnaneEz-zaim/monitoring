@@ -97,5 +97,11 @@ body {
     justify-content: center; /* centre horizontalement l'élément */
 }
 
+.machineNumberInfo {
+    padding:10px;
+    text-align:center;
+}
+
+
 
 
