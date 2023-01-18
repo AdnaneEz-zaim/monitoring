@@ -62,7 +62,6 @@ class Config:
             print(self.machines_usernames[id])
             print(self.machines_passwords[id])
             print(self.machines_ports[id])
-
             print("Machine" + str(id) + " configuration successfully loaded !")
             print("--------------------------------------------")
 
@@ -79,21 +78,22 @@ class Config:
     def setMachineConfiguration(self, newHostname, newUsername, newPassword, newPort):
         # Initialize config parser
         config = configparser.ConfigParser()
-
         # Read config file
         config.read('config.ini')
 
-        # Get the current values of the parameters
-        hostnames = config.get('monitored_machines', 'hostnames')
-        usernames = config.get('monitored_machines', 'usernames')
-        passwords = config.get('monitored_machines', 'passwords')
-        ports = config.get('monitored_machines', 'ports')
+        # Add new monitors to the current list
+        self.machines_hostnames.append(newHostname)
+        self.machines_usernames.append(newUsername)
+        self.machines_passwords.append(newPassword)
+        self.machines_ports.append(newPort)
 
-        # Add new machines
-        hostnames += ";" + newHostname
-        usernames += ";" + newUsername
-        passwords += ";" + newPassword
-        ports += ";" + newPort
+
+        # Create the new parameter line in the config file
+        separator = ";"
+        hostnames = separator.join(self.machines_hostnames)
+        usernames = separator.join(self.machines_usernames)
+        passwords = separator.join(self.machines_passwords)
+        ports = separator.join(self.machines_ports)
 
         # Set the new values of the parameters
         config.set('monitored_machines', 'hostnames', hostnames)
