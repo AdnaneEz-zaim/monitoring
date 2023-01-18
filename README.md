@@ -15,11 +15,11 @@ docker run -p 8050:8050 devops.telecomste.fr:5050/printerfaceadmin/2022-23/group
 
 ## How to use the software
 
-After running the previous command, you will redirected on a web navigator where u will be ask to enter the
-*hostnames
-*usernames
-*passwords
-*ports
+After running the previous command, you will redirected on a web navigator where u will be ask to enter the 
+*hostnames*
+*usernames*
+*passwords*
+*ports*
 of the machines you want to monitor.
 
 Then graphics with datas of your machines will be displayed on the screen.
@@ -30,7 +30,7 @@ All you have to do now is to watch your graphs.
 
 This software has been designed and created by Axel ANTOINE, Nicolas PAILLARD, adnane EZ-ZAIM, Anatole GAGNIERE, Mariame KHANFRI.
 
-## Screenshot
+## Explanations in screenshots
 
 ### Home page (= Monitoring page)
  
@@ -51,7 +51,7 @@ Once a machine has been added, we can see it in on the overview page.
 
 ### Monitoring page
 
-Finally, the graphs are all seenable for the added machines on this page :  
+Finally, the graphs are all seenable for the added machines on this page (there 6 graphs by machine as you can see) :  
 
 ![monitoring](https://devops.telecomste.fr/printerfaceadmin/2022-23/group6/-/raw/UserNotice/screenshots/page_monitoring_1machine.png)
 
