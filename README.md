@@ -30,13 +30,31 @@ All you have to do now is to watch your graphs.
 
 This software has been designed and created by Axel ANTOINE, Nicolas PAILLARD, adnane EZ-ZAIM, Anatole GAGNIERE, Mariame KHANFRI.
 
-### Screenshot
+## Screenshot
 
-## Home page (= Monitoring page)
+### Home page (= Monitoring page)
  
 When we first run the software, we arrive on the monitoring page, with nothing on it because no machine has been added yet.
 ![home](https://devops.telecomste.fr/printerfaceadmin/2022-23/group6/-/raw/UserNotice/screenshots/Page_accueil.png)
 
+### Configuration page
+
+Here the user can enter the configuration of a machine which he wants to monitor.
+
+![add](https://devops.telecomste.fr/printerfaceadmin/2022-23/group6/-/raw/UserNotice/screenshots/Page_addmachine.png)
+
+### Overview page
+
+Once a machine has been added, we can see it in on the overview page.
+
+![overview](https://devops.telecomste.fr/printerfaceadmin/2022-23/group6/-/raw/UserNotice/screenshots/page_overview_1machine.png)
+
+### Monitoring page
+
+Finally, the graphs are all seenable for the added machines on this page :  
+
+![monitoring](https://devops.telecomste.fr/printerfaceadmin/2022-23/group6/-/raw/UserNotice/screenshots/page_monitoring_1machine.png)
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README..
+
+As said in the description, this software can be used by anybody and even companie to monitor machines from distance.
