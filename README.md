@@ -30,8 +30,12 @@ All you have to do now is to watch your graphs.
 
 This software has been designed and created by Axel ANTOINE, Nicolas PAILLARD, adnane EZ-ZAIM, Anatole GAGNIERE, Mariame KHANFRI.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### Screenshot
+
+## Home page (= Monitoring page)
+ 
+When we first run the software, we arrive on the monitoring page, with nothing on it because no machine has been added yet.
+![home](https://devops.telecomste.fr/printerfaceadmin/2022-23/group6/-/raw/UserNotice/screenshots/Page_accueil.png)
 
 
 ## Usage
