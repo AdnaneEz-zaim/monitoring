@@ -10,7 +10,8 @@ To use this software, the only thing needed on your computer is docker.
 
 ## How to run/use the software
 
-To run this software, there is only one commande needed : docker run/pull <your_image>
+To run this software, there is only one commande needed :
+docker run -p 8050:8050 devops.telecomste.fr:5050/printerfaceadmin/2022-23/group6
 
 ## How to use the software
 
