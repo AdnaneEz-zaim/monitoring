@@ -16,10 +16,10 @@ docker run -p 8050:8050 devops.telecomste.fr:5050/printerfaceadmin/2022-23/group
 ## How to use the software
 
 After running the previous command, you will redirected on a web navigator where u will be ask to enter the 
-*hostnames*
-*usernames*
-*passwords*
-*ports*
+**hostnames**/
+**usernames**/
+**passwords**/
+**ports**
 of the machines you want to monitor.
 
 Then graphics with datas of your machines will be displayed on the screen.
@@ -57,4 +57,4 @@ Finally, the graphs are all seenable for the added machines on this page (there 
 
 ## Usage
 
-As said in the description, this software can be used by anybody and even companie to monitor machines from distance.
+As said in the description, this software can be used by anybody and even companies to monitor machines from distance.
