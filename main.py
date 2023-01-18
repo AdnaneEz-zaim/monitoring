@@ -10,118 +10,100 @@ from models.Connexion import Connexion
 from models.MonitorThreading import MonitorTreading
 from models.ApacheServerLogInfo import LogInfo
 from models.CSVFiller import fill_csv
+from models.ClientManager import ClientManager
 import models.Dash as Dashboard
 from dash import html
 
-# Init variables
-machineConfiguration = Config()
-nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
-monitors = []
-connexions = []
-clients = []
-logInfo = []
-csv_fileNames = [[] for _ in range(nbMachineConfiguration)]
-uptime_serverResults = [None] * nbMachineConfiguration
-cpuModel_server = [None] * nbMachineConfiguration
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
+                use_pages=True, suppress_callback_exceptions=True)
+app.title = "GROUP 6 Server Monitoring Dashboard"
+app.layout = Dashboard.generate_header_layout()
 
+# Init variables
+m_machineConfiguration = Config()
+m_clientManager = ClientManager()
+m_logInfo = []
+m_csv_fileNames = []
+m_uptime_serverResults = []
+m_cpuModel_server = []
 outputs_hardwareUsage = []
 outputs_apache = []
 outputs_uptime = []
 
 # Init
-for h in range(machineConfiguration.getNbMachineConfigurations()):
-    monitors.append(machineConfiguration.loadMachineConfiguration(h))
-    connexions.append(Connexion(monitors[h]))
-    clients.append(connexions[h].client)
-    logInfo.append(LogInfo())
+for host in range(m_machineConfiguration.getNbMachineConfigurations()):
+    newMonitor = m_machineConfiguration.getMachineConfiguration(host)
+    newClient = Connexion(newMonitor)
 
-    # CREATE CSV NAMES
-    # APACHE LOG -----------------------------------------------------
-    # CSV Error code
-    csv_filename = machineConfiguration.machines_hostnames[h] \
-                   + '_apacheLog_statusCode404' \
-                   + '.csv'
-    csv_fileNames[h].append(csv_filename)
+    if newClient.client is not None:
+        m_clientManager.addClient(newMonitor, newClient.client)
+        m_logInfo.append(LogInfo())
+        m_uptime_serverResults.append("")
+        m_cpuModel_server.append("")
 
-    # CSV Client connect
-    csv_filename = machineConfiguration.machines_hostnames[h] \
-                   + '_apacheLog_clientConnect' \
-                   + '.csv'
-    csv_fileNames[h].append(csv_filename)
-
-    # CSV URL request
-    csv_filename = machineConfiguration.machines_hostnames[h] \
-                   + '_apacheLog_requestUrl' \
-                   + '.csv'
-    csv_fileNames[h].append(csv_filename)
-
-    # Hardware usage ---------------------------------------
-    csv_filename = machineConfiguration.machines_hostnames[h] \
-                   + '_hardwareUsage' \
-                   + '.csv'
-    csv_fileNames[h].append(csv_filename)
+        # Create csv file names
+        hostname = m_machineConfiguration.getMachineConfiguration(host).hostname
+        list_csv = [hostname + suffix + '.csv' for suffix in
+                    ["_apacheLog_statusCode404",
+                     "_apacheLog_clientConnect",
+                     "_apacheLog_requestUrl",
+                     "_hardwareUsage"
+                     ]
+                    ]
+        m_csv_fileNames.append(list_csv)
 
 
 def update_variables():
+    global m_machineConfiguration, m_clientManager, m_logInfo, \
+        m_csv_fileNames, m_uptime_serverResults, m_cpuModel_server, \
+        outputs_hardwareUsage, outputs_apache, outputs_uptime
     """
     Update variables when new configuration is added to config.ini
     """
-    global machineConfiguration, nbMachineConfiguration, \
-        monitors, connexions, clients, logInfo, csv_fileNames, \
-        uptime_serverResults, cpuModel_server, csv_filename
-    # Init variables
-    machineConfiguration = Config()
-    nbMachineConfiguration = machineConfiguration.getNbMachineConfigurations()
-    monitors = []
-    connexions = []
-    clients = []
-    logInfo = []
-    csv_fileNames = [[] for _ in range(nbMachineConfiguration)]
-    uptime_serverResults = [None] * nbMachineConfiguration
-    cpuModel_server = [None] * nbMachineConfiguration
+    m_machineConfiguration = Config()
+    m_clientManager = ClientManager()
+    m_logInfo = []
+    m_csv_fileNames = []
+    m_uptime_serverResults = []
+    m_cpuModel_server = []
+    outputs_hardwareUsage = []
+    outputs_apache = []
+    outputs_uptime = []
 
     # Init
-    for host in range(machineConfiguration.getNbMachineConfigurations()):
-        print(host)
-        monitors.append(machineConfiguration.loadMachineConfiguration(host))
-        connexions.append(Connexion(monitors[host]))
-        clients.append(connexions[host].client)
-        logInfo.append(LogInfo())
+    for host in range(m_machineConfiguration.getNbMachineConfigurations()):
+        newMonitor = m_machineConfiguration.getMachineConfiguration(host)
+        newClient = Connexion(newMonitor)
 
-        # CREATE CSV NAMES
-        # APACHE LOG -----------------------------------------------------
-        # CSV Error code
-        csv_filename = machineConfiguration.machines_hostnames[host] \
-                       + '_apacheLog_statusCode404' \
-                       + '.csv'
-        csv_fileNames[host].append(csv_filename)
+        if newClient.client is not None:
+            m_clientManager.addClient(newMonitor, newClient.client)
+            m_logInfo.append(LogInfo())
+            m_uptime_serverResults.append("")
+            m_cpuModel_server.append("")
 
-        # CSV Client connect
-        csv_filename = machineConfiguration.machines_hostnames[host] \
-                       + '_apacheLog_clientConnect' \
-                       + '.csv'
-        csv_fileNames[host].append(csv_filename)
-
-        # CSV URL request
-        csv_filename = machineConfiguration.machines_hostnames[host] \
-                       + '_apacheLog_requestUrl' \
-                       + '.csv'
-        csv_fileNames[host].append(csv_filename)
-
-        # Hardware usage ---------------------------------------
-        csv_filename = machineConfiguration.machines_hostnames[host] \
-                       + '_hardwareUsage' \
-                       + '.csv'
-        csv_fileNames[host].append(csv_filename)
+            # Create csv file names
+            hostname = m_machineConfiguration.getMachineConfiguration(host).hostname
+            list_csv = [hostname + suffix + '.csv' for suffix in
+                        ["_apacheLog_statusCode404",
+                         "_apacheLog_clientConnect",
+                         "_apacheLog_requestUrl",
+                         "_hardwareUsage"
+                         ]
+                        ]
+            m_csv_fileNames.append(list_csv)
 
 
 def get_data():
     """ gather data from data scrapper threads"""
     while True:
-        # Starting one thread for each client
+        global m_machineConfiguration
+        global m_clientManager
+        # Starting one thread for each client connected
+
         MonitorThreads = []
-        for host in range(machineConfiguration.getNbMachineConfigurations()):
-            t = MonitorTreading(clients[host], host, logInfo[host])
+        for host in range(m_clientManager.getNbConnectedClient()):
+            t = MonitorTreading(m_clientManager.getClientById(host), host, m_logInfo[host])
             t.start()
             MonitorThreads.append(t)
 
@@ -138,25 +120,25 @@ def get_data():
             # Get Monitoring hardware usage results
             hardwareUsageResults.append(t.hardwareUsage_result)
 
-            uptime_serverResults[hostid] = t.uptime_result
-            cpuModel_server[hostid] = t.CPU_name_result
+            m_uptime_serverResults[hostid] = t.uptime_result
+            m_cpuModel_server[hostid] = t.CPU_name_result
 
             # Get monitoring apache log results
             apache_statusCode_results.append(t.apache_statusCode_result)
             apache_clientConnect_results.append(t.apache_clientConnect_result)
             apache_requestUrl_results.append(t.apache_requestUrl_result)
+
+            print("-[BACKEND]-DATA SCRAPPING DONE")
+            # CSV Filling
+
+            fill_csv(m_csv_fileNames[hostid][0], apache_statusCode_results, hostid)
+            fill_csv(m_csv_fileNames[hostid][1], apache_clientConnect_results, hostid)
+            fill_csv(m_csv_fileNames[hostid][2], apache_requestUrl_results, hostid)
+            fill_csv(m_csv_fileNames[hostid][3], hardwareUsageResults, hostid)
+
             hostid = hostid + 1
 
-        print("-[BACKEND]-DATA SCRAPPING DONE")
-
-        # CSV Filling
-        for host_id in range(machineConfiguration.getNbMachineConfigurations()):
-            fill_csv(csv_fileNames[host_id][0], apache_statusCode_results, host_id)
-            fill_csv(csv_fileNames[host_id][1], apache_clientConnect_results, host_id)
-            fill_csv(csv_fileNames[host_id][2], apache_requestUrl_results, host_id)
-            fill_csv(csv_fileNames[host_id][3], hardwareUsageResults, host_id)
-
-        print("-[BACKEND]-CSV FILLING DONE")
+            print("-[BACKEND]-CSV FILLING DONE")
 
         time.sleep(5)
 
@@ -166,40 +148,35 @@ dataScrapperThread = threading.Thread(target=get_data)
 # Start the data scrapper thread
 dataScrapperThread.start()
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets,
-                use_pages=True, suppress_callback_exceptions=True)
-app.title = "GROUP 6 Server Monitoring Dashboard"
-app.layout = Dashboard.generate_header_layout()
-
 
 @app.callback(
     Output('server-graph', 'children'),
     [
         Input('refresh-graph-button', 'n_clicks'),
-        Input('interval-component', 'n_intervals')
+        Input('interval-component-graph', 'n_intervals')
     ],
     State('server-graph', 'children')
 )
 def display_graphServerMonitoring(n_clicks, n_intervals, children):
     print("ADD GRAPH MONITORING")
-    machineConfig = Config()
+
     children = []
-    for host in range(machineConfig.getNbMachineConfigurations()):
+    for host in range(m_clientManager.getNbConnectedClient()):
+        host_name = m_clientManager.getMachineConfiguration(host).hostname
         # Title
         new_titleHostname = Dashboard.generate_hostname_title(
-            machineConfig.machines_hostnames[host],
-            uptime_serverResults,
+            host_name,
+            m_uptime_serverResults,
             host)
         # Hardware graph
         new_graphHardware = Dashboard.generate_layout_hardware(
-            csv_fileNames[host][3],
-            cpuModel_server,
+            m_csv_fileNames[host][3],
+            m_cpuModel_server,
             host)
 
         # Apache Graph
-        csv_hostname = machineConfig.machines_hostnames[host]
-        filtered_csv_list = [s for s in csv_fileNames[host] if s.startswith(csv_hostname)]
+
+        filtered_csv_list = [s for s in m_csv_fileNames[host] if s.startswith(host_name)]
         apache_csv_list = [csvName for csvName in filtered_csv_list if "apache" in csvName]
         new_graphApache = Dashboard.generate_layout_apache(apache_csv_list, host)
 
@@ -220,16 +197,31 @@ def display_graphServerMonitoring(n_clicks, n_intervals, children):
 )
 def display_panelServerOverview(n_clicks, n_intervals):
     print("ADD PANELS OVERVIEW")
-    machineConfig = Config()
 
     children = []
-    for host in range(machineConfig.getNbMachineConfigurations()):
+    for host in range(m_clientManager.getNbConnectedClient()):
+        host_name = m_clientManager.getMachineConfiguration(host).hostname
         new_panel = Dashboard.generate_serverOverviewPanel(
-            machineConfig.machines_hostnames[host],
-            uptime_serverResults,
+            host_name,
+            m_uptime_serverResults,
             host)
         children.append(new_panel)
 
+    return children
+
+
+@app.callback(
+    Output('lblMacNumber', 'children'),
+    [
+        Input('refresh-panel-button', 'n_clicks'),
+        Input('interval-component-overview', 'n_intervals')
+    ]
+)
+def update_lblMacConnectionConfiguration(n_clicks, n_intervals):
+    children = Dashboard.generate_serverNumberConnection(
+        m_clientManager.getNbConnectedClient(),
+        m_machineConfiguration.getNbMachineConfigurations()
+    )
     return children
 
 
@@ -246,7 +238,7 @@ def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, input
     if n_clicks == 0:
         return ''
 
-    machineConfiguration.setMachineConfiguration(
+    m_machineConfiguration.setMachineConfiguration(
         inputHostname,
         inputUsername,
         inputPassword,
@@ -255,4 +247,5 @@ def get_input_value(n_clicks, inputHostname, inputUsername, inputPassword, input
     return html.Div('''New configuration will be visible in few seconds ...''')
 
 
-app.run(debug=False, host='0.0.0.0', port=8050)
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0', port=8050)

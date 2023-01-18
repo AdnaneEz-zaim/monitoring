@@ -28,10 +28,11 @@ def generate_overview_layout():
                             className="pageTitle"
                             )
     button_layout = html.Div(html.Button('Refresh', id='refresh-panel-button', n_clicks=0), className="buttonSubmit")
+    labelMachineNumber = html.Div(children="", className="machineNumberInfo", id="lblMacNumber")
     server_layout = html.Div(children=[],
                              id="server-overview"
                              )
-    final_layout = [title_layout, button_layout, server_layout, generate_interval_component()]
+    final_layout = [title_layout, button_layout, labelMachineNumber, server_layout, generate_interval_component("overview")]
     return generate_app_layout(final_layout, 'overview')
 
 
@@ -47,6 +48,12 @@ def generate_serverOverviewPanel(hostname, uptime_serverResults, h):
     )
     return panel_layout
 
+def generate_serverNumberConnection(nbConnection, nbConfigurated):
+    lbl_layout = html.Div([
+        html.Div(children="Active connection(s) : " + str(nbConnection)),
+        html.Div(children="Active configuration(s) : " + str(nbConfigurated))
+    ])
+    return lbl_layout
 
 # Layout page monitoring
 def generate_monitoring_layout():
@@ -58,7 +65,7 @@ def generate_monitoring_layout():
                                  id="server-graph"
                                  )
 
-    final_layout = [title_layout, button_layout, monitoring_layout, generate_interval_component()]
+    final_layout = [title_layout, button_layout, monitoring_layout, generate_interval_component("graph")]
     return generate_app_layout(final_layout, 'monitoring')
 
 
@@ -81,10 +88,11 @@ def generate_configuration_layout():
     return generate_app_layout(final_layout, 'configuration')
 
 
-def generate_interval_component():
+def generate_interval_component(suffix):
+    component_id = 'interval-component-' + suffix
     interval_layout = html.Div([
         dcc.Interval(
-            id='interval-component',
+            id=component_id,
             interval=10000,  # en ms
             n_intervals=0
         )
